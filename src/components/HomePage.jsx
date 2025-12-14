@@ -64,149 +64,191 @@ export default function HomePage() {
         <p>Discover and share Claude-created teaching resources for UK secondary education</p>
       </div>
 
-      <div style={{ padding: '40px 20px', maxWidth: '1400px', margin: '0 auto' }}>
-        {artifacts.length === 0 ? (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '60px 20px',
-            background: 'white',
-            borderRadius: '12px',
-            maxWidth: '600px',
-            margin: '0 auto'
-          }}>
-            <h2 style={{ fontSize: '24px', marginBottom: '12px', color: '#1F2937' }}>
-              No artifacts yet
-            </h2>
-            <p style={{ color: '#6B7280', marginBottom: '24px' }}>
-              Be the first to share a Claude-created teaching resource!
-            </p>
-            <button className="btn-primary">Submit Your First Artifact</button>
-          </div>
-        ) : (
-          <div>
-            <h2 style={{ 
-              fontSize: '28px', 
-              marginBottom: '30px', 
-              color: '#1F2937',
-              fontWeight: '700'
-            }}>
-              Recent Artifacts
-            </h2>
+      <div className="page-section">
+        <div className="container">
+          {artifacts.length === 0 ? (
             <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
-              gap: '24px' 
+              textAlign: 'center', 
+              padding: '60px 20px',
+              background: 'white',
+              borderRadius: '16px',
+              maxWidth: '600px',
+              margin: '0 auto',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
             }}>
-              {artifacts.map((artifact) => (
-                <div key={artifact.id} className="card">
-                  {artifact.screenshot_url && (
-                    <img 
-                      src={artifact.screenshot_url} 
-                      alt={artifact.title}
-                      style={{ 
-                        width: '100%', 
-                        height: '200px', 
-                        objectFit: 'cover', 
-                        borderRadius: '8px',
-                        marginBottom: '16px'
-                      }}
-                    />
-                  )}
-                  <h3 style={{ 
-                    fontSize: '20px', 
-                    marginBottom: '12px',
-                    color: '#1F2937',
-                    fontWeight: '600'
-                  }}>
-                    {artifact.title}
-                  </h3>
-                  
-                  {artifact.description && (
-                    <p style={{ 
-                      color: '#6B7280', 
-                      marginBottom: '16px',
-                      fontSize: '15px',
-                      lineHeight: '1.5'
-                    }}>
-                      {artifact.description}
-                    </p>
-                  )}
-                  
-                  <div style={{ marginBottom: '16px' }}>
-                    {artifact.artifact_subjects?.map((s, i) => (
-                      <span key={i} className="tag">
-                        {s.subject}
-                      </span>
-                    ))}
-                    {artifact.artifact_key_stages?.map((k, i) => (
-                      <span key={i} className="tag key-stage">
-                        {k.key_stage}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    paddingTop: '16px',
-                    borderTop: '1px solid #E5E7EB'
-                  }}>
-                    <a 
-                      href={artifact.artifact_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      style={{ fontSize: '15px' }}
-                    >
-                      View Artifact →
-                    </a>
-                    <button 
-                      onClick={() => handleVote(artifact.id)}
-                      style={{ 
-                        background: 'none',
-                        border: '1px solid #E5E7EB',
-                        padding: '6px 12px',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}
-                    >
-                      ⬆️ {artifact.votes || 0}
-                    </button>
-                  </div>
-
-                  {artifact.first_prompt && (
-                    <details style={{ marginTop: '16px' }}>
-                      <summary style={{ 
-                        cursor: 'pointer',
-                        color: '#8B5CF6',
-                        fontWeight: '600',
-                        fontSize: '14px'
-                      }}>
-                        View Original Prompt
-                      </summary>
-                      <p style={{ 
-                        marginTop: '12px',
-                        padding: '12px',
-                        background: '#F9FAFB',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        color: '#4B5563',
-                        fontStyle: 'italic',
-                        lineHeight: '1.6'
-                      }}>
-                        {artifact.first_prompt}
-                      </p>
-                    </details>
-                  )}
-                </div>
-              ))}
+              <div style={{ fontSize: '64px', marginBottom: '20px', opacity: '0.3' }}>
+                📚
+              </div>
+              <h2 style={{ fontSize: 'clamp(24px, 4vw, 32px)', marginBottom: '16px', color: '#1F2937', fontWeight: '700' }}>
+                No artifacts yet
+              </h2>
+              <p style={{ color: '#6B7280', marginBottom: '32px', fontSize: 'clamp(16px, 2vw, 18px)', lineHeight: '1.6' }}>
+                Be the first to share a Claude-created teaching resource!
+              </p>
             </div>
-          </div>
-        )}
+          ) : (
+            <>
+              <div className="section-header">
+                <h2 className="section-title">Recent Artifacts</h2>
+                <p className="section-subtitle">
+                  {artifacts.length} {artifacts.length === 1 ? 'resource' : 'resources'} shared by teachers
+                </p>
+              </div>
+              
+              <div className="artifact-grid">
+                {artifacts.map((artifact) => (
+                  <div 
+                    key={artifact.id} 
+                    className="card"
+                    style={{ 
+                      padding: '0',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      height: '100%'
+                    }}
+                  >
+                    {artifact.screenshot_url && (
+                      <div style={{ 
+                        width: '100%', 
+                        height: '200px',
+                        overflow: 'hidden',
+                        background: '#F3F4F6'
+                      }}>
+                        <img 
+                          src={artifact.screenshot_url} 
+                          alt={artifact.title}
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            objectFit: 'cover',
+                            transition: 'transform 0.3s'
+                          }}
+                        />
+                      </div>
+                    )}
+                    
+                    <div style={{ padding: '20px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                      <h3 style={{ 
+                        fontSize: 'clamp(18px, 3vw, 22px)', 
+                        marginBottom: '12px',
+                        color: '#1F2937',
+                        fontWeight: '700',
+                        lineHeight: '1.3'
+                      }}>
+                        {artifact.title}
+                      </h3>
+                      
+                      {artifact.description && (
+                        <p style={{ 
+                          color: '#4B5563', 
+                          marginBottom: '16px',
+                          fontSize: 'clamp(14px, 2vw, 15px)',
+                          lineHeight: '1.6',
+                          flexGrow: 1
+                        }}>
+                          {artifact.description.length > 120 
+                            ? artifact.description.substring(0, 120) + '...' 
+                            : artifact.description}
+                        </p>
+                      )}
+                      
+                      <div style={{ marginBottom: '16px', minHeight: '30px' }}>
+                        {artifact.artifact_key_stages?.map((k, i) => (
+                          <span key={i} className="tag key-stage">
+                            {k.key_stage}
+                          </span>
+                        ))}
+                        {artifact.artifact_subjects?.slice(0, 2).map((s, i) => (
+                          <span key={i} className="tag">
+                            {s.subject}
+                          </span>
+                        ))}
+                        {artifact.artifact_subjects?.length > 2 && (
+                          <span className="tag" style={{ background: '#9CA3AF' }}>
+                            +{artifact.artifact_subjects.length - 2}
+                          </span>
+                        )}
+                      </div>
+
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        paddingTop: '16px',
+                        borderTop: '1px solid #E5E7EB',
+                        marginTop: 'auto',
+                        gap: '12px',
+                        flexWrap: 'wrap'
+                      }}>
+                        <a 
+                          href={artifact.artifact_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          style={{ 
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          View Artifact →
+                        </a>
+                        <button 
+                          onClick={() => handleVote(artifact.id)}
+                          style={{ 
+                            background: '#F9FAFB',
+                            border: '2px solid #E5E7EB',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          ⬆️ {artifact.votes || 0}
+                        </button>
+                      </div>
+
+                      {artifact.first_prompt && (
+                        <details style={{ marginTop: '16px' }}>
+                          <summary style={{ 
+                            cursor: 'pointer',
+                            color: '#8B5CF6',
+                            fontWeight: '600',
+                            fontSize: '13px',
+                            padding: '12px 0',
+                            borderTop: '1px solid #E5E7EB'
+                          }}>
+                            💡 Original Prompt
+                          </summary>
+                          <p style={{ 
+                            marginTop: '8px',
+                            padding: '12px',
+                            background: '#F9FAFB',
+                            borderRadius: '6px',
+                            fontSize: '13px',
+                            color: '#4B5563',
+                            fontStyle: 'italic',
+                            lineHeight: '1.6',
+                            borderLeft: '3px solid #8B5CF6'
+                          }}>
+                            "{artifact.first_prompt}"
+                          </p>
+                        </details>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -31,22 +31,9 @@ function AppContent() {
   return (
     <div style={{ minHeight: '100vh' }}>
       <nav>
-        <div style={{ 
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '1400px',
-          margin: '0 auto'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <h2 style={{ 
-              fontSize: '20px', 
-              fontWeight: '700', 
-              color: '#8B5CF6',
-              marginRight: '20px'
-            }}>
-              Artifact Library
-            </h2>
+        <div className="nav-content">
+          <div className="nav-left">
+            <h2>Artifact Library</h2>
             <button 
               onClick={() => setCurrentPage('home')}
               style={{
@@ -58,18 +45,17 @@ function AppContent() {
             </button>
             <button 
               onClick={() => setCurrentPage('submit')}
-              className={currentPage === 'submit' ? '' : ''}
               style={{
                 background: currentPage === 'submit' ? '#8B5CF6' : 'transparent',
                 color: currentPage === 'submit' ? 'white' : '#6B7280',
                 fontWeight: '600'
               }}
             >
-              + Submit Artifact
+              + Submit
             </button>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ color: '#6B7280', fontSize: '14px' }}>{user.email}</span>
+          <div className="nav-right">
+            <span className="user-email">{user.email}</span>
             <button 
               onClick={signOut}
               style={{

@@ -29,26 +29,71 @@ body {
 
 #root {
   min-height: 100vh;
+  width: 100%;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 /* Navigation */
 nav {
   background: var(--white);
-  padding: 20px 40px !important;
+  padding: 16px 0 !important;
   border-bottom: 1px solid var(--border-color) !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+nav h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--claude-purple);
+  white-space: nowrap;
 }
 
 nav button {
   background: none;
   border: none;
   color: var(--text-gray);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-radius: 6px;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 nav button:hover {
@@ -63,6 +108,12 @@ nav button.primary {
 
 nav button.primary:hover {
   background: var(--claude-purple-dark);
+}
+
+nav .user-email {
+  color: var(--text-gray);
+  font-size: 14px;
+  display: none;
 }
 
 /* Buttons */
@@ -114,7 +165,8 @@ input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="url"],
-textarea {
+textarea,
+input[type="file"] {
   width: 100%;
   padding: 12px 16px;
   font-size: 16px;
@@ -137,6 +189,7 @@ label {
   margin-bottom: 8px;
   font-weight: 600;
   color: var(--text-dark);
+  font-size: 15px;
 }
 
 /* Cards */
@@ -146,6 +199,7 @@ label {
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.3s;
+  width: 100%;
 }
 
 .card:hover {
@@ -160,7 +214,7 @@ label {
   color: var(--white);
   padding: 6px 12px;
   border-radius: 16px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   margin-right: 6px;
   margin-bottom: 6px;
@@ -187,39 +241,151 @@ a:hover {
 .hero {
   background: linear-gradient(135deg, var(--claude-purple) 0%, var(--claude-purple-dark) 100%);
   color: var(--white);
-  padding: 60px 40px;
+  padding: 40px 20px;
   text-align: center;
-  margin-bottom: 40px;
+  width: 100%;
 }
 
 .hero h1 {
-  font-size: 48px;
-  margin-bottom: 16px;
+  font-size: clamp(28px, 5vw, 48px);
+  margin-bottom: 12px;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .hero p {
-  font-size: 20px;
+  font-size: clamp(16px, 3vw, 20px);
   opacity: 0.95;
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
+  line-height: 1.5;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Page Sections */
+.page-section {
+  padding: 40px 20px;
+  width: 100%;
+}
+
+.section-header {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-size: clamp(24px, 4vw, 36px);
+  color: var(--text-dark);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.section-subtitle {
+  font-size: clamp(14px, 2vw, 18px);
+  color: var(--text-gray);
+}
+
+/* Grid */
+.artifact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+/* Responsive breakpoints */
+@media (min-width: 640px) {
+  nav .user-email {
+    display: inline;
+  }
+  
+  .artifact-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
   nav {
-    padding: 15px 20px !important;
+    padding: 20px 0 !important;
+  }
+  
+  nav h2 {
+    font-size: 20px;
+    margin-right: 20px;
   }
   
   .hero {
-    padding: 40px 20px;
+    padding: 60px 40px;
   }
   
-  .hero h1 {
-    font-size: 32px;
+  .page-section {
+    padding: 60px 40px;
   }
   
-  .hero p {
-    font-size: 16px;
+  .container {
+    padding: 0 40px;
+  }
+  
+  .artifact-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nav-content {
+    flex-wrap: nowrap;
+  }
+  
+  .artifact-grid {
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 32px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    padding: 0 60px;
+  }
+  
+  .artifact-grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 36px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    padding: 0 80px;
+  }
+  
+  .artifact-grid {
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 40px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .container {
+    padding: 0 100px;
+  }
+  
+  .artifact-grid {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 16px;
+  }
+  
+  .tag {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+  
+  nav button {
+    font-size: 14px;
+    padding: 6px 12px;
   }
 }
