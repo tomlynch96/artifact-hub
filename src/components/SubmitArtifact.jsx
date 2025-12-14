@@ -22,7 +22,7 @@ export default function SubmitArtifact({ onSuccess }) {
     try {
       // Validate Claude artifact URL
       if (!formData.artifact_url.startsWith('https://claude.ai/public/artifacts/') && 
-    !formData.artifact_url.startsWith('https://claude.site/artifacts/')) {
+          !formData.artifact_url.startsWith('https://claude.site/artifacts/')) {
         throw new Error('Please enter a valid Claude artifact URL (must start with https://claude.ai/public/artifacts/)')
       }
 
@@ -113,132 +113,204 @@ export default function SubmitArtifact({ onSuccess }) {
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '30px auto', padding: '20px' }}>
-      <h2>Submit Your Artifact</h2>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Title *
-          </label>
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            required
-            style={{ width: '100%', padding: '10px', fontSize: '16px' }}
-          />
-        </div>
+    <div style={{ 
+      padding: '40px 20px', 
+      maxWidth: '900px', 
+      margin: '0 auto' 
+    }}>
+      <div style={{ marginBottom: '40px' }}>
+        <h1 style={{ fontSize: '36px', marginBottom: '12px', color: '#1F2937', fontWeight: '700' }}>
+          Submit Your Artifact
+        </h1>
+        <p style={{ fontSize: '18px', color: '#6B7280' }}>
+          Share your Claude-created teaching resource with the community
+        </p>
+      </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Claude Artifact URL *
-          </label>
-          <input
-            type="url"
-            value={formData.artifact_url}
-            onChange={(e) => setFormData({ ...formData, artifact_url: e.target.value })}
-            placeholder="https://claude.site/artifacts/..."
-            required
-            style={{ width: '100%', padding: '10px', fontSize: '16px' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Screenshot *
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setScreenshot(e.target.files[0])}
-            required
-            style={{ width: '100%', padding: '10px' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            How to use in lessons
-          </label>
-          <textarea
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            rows={4}
-            style={{ width: '100%', padding: '10px', fontSize: '16px' }}
-            placeholder="Describe how you use this artifact in your classroom..."
-          />
-        </div>
-
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-            Original Prompt (optional)
-          </label>
-          <textarea
-            value={formData.first_prompt}
-            onChange={(e) => setFormData({ ...formData, first_prompt: e.target.value })}
-            rows={3}
-            style={{ width: '100%', padding: '10px', fontSize: '16px' }}
-            placeholder="The prompt you used to create this artifact..."
-          />
-        </div>
-
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
-            Subjects *
-          </label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
-            {SUBJECTS.map(subject => (
-              <label key={subject} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={formData.subjects.includes(subject)}
-                  onChange={() => handleSubjectToggle(subject)}
-                  style={{ marginRight: '8px' }}
-                />
-                {subject}
-              </label>
-            ))}
+      <div className="card" style={{ padding: '40px' }}>
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '28px' }}>
+            <label>Artifact Title *</label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="e.g., Interactive Periodic Table Quiz"
+              required
+            />
           </div>
-        </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
-            Key Stages *
-          </label>
-          <div style={{ display: 'flex', gap: '15px' }}>
-            {KEY_STAGES.map(keyStage => (
-              <label key={keyStage} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={formData.keyStages.includes(keyStage)}
-                  onChange={() => handleKeyStageToggle(keyStage)}
-                  style={{ marginRight: '8px' }}
-                />
-                {keyStage}
-              </label>
-            ))}
+          <div style={{ marginBottom: '28px' }}>
+            <label>Claude Artifact URL *</label>
+            <input
+              type="url"
+              value={formData.artifact_url}
+              onChange={(e) => setFormData({ ...formData, artifact_url: e.target.value })}
+              placeholder="https://claude.ai/public/artifacts/..."
+              required
+            />
+            <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '6px' }}>
+              Paste the share link from your Claude artifact
+            </p>
           </div>
-        </div>
 
-        {error && <p style={{ color: 'red', marginBottom: '15px' }}>{error}</p>}
+          <div style={{ marginBottom: '28px' }}>
+            <label>Screenshot *</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setScreenshot(e.target.files[0])}
+              required
+              style={{ 
+                padding: '16px',
+                border: '2px dashed #E5E7EB',
+                borderRadius: '8px',
+                cursor: 'pointer'
+              }}
+            />
+            <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '6px' }}>
+              Upload a preview image of your artifact
+            </p>
+          </div>
 
-        <button 
-          type="submit" 
-          disabled={loading || formData.subjects.length === 0 || formData.keyStages.length === 0}
-          style={{ 
-            width: '100%', 
-            padding: '15px', 
-            fontSize: '18px', 
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: loading ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {loading ? 'Submitting...' : 'Submit Artifact'}
-        </button>
-      </form>
+          <div style={{ marginBottom: '28px' }}>
+            <label>How to Use in Lessons</label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={5}
+              placeholder="Describe how you use this artifact in your classroom, what topics it covers, and any tips for other teachers..."
+            />
+          </div>
+
+          <div style={{ marginBottom: '28px' }}>
+            <label>Original Prompt (Optional)</label>
+            <textarea
+              value={formData.first_prompt}
+              onChange={(e) => setFormData({ ...formData, first_prompt: e.target.value })}
+              rows={4}
+              placeholder="Share the prompt you used to create this artifact so others can learn from it..."
+            />
+            <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '6px' }}>
+              Help other teachers by sharing how you created this
+            </p>
+          </div>
+
+          <div style={{ marginBottom: '28px' }}>
+            <label>Subjects * (Select all that apply)</label>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', 
+              gap: '12px',
+              marginTop: '12px'
+            }}>
+              {SUBJECTS.map(subject => (
+                <label 
+                  key={subject} 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    cursor: 'pointer',
+                    padding: '12px',
+                    background: formData.subjects.includes(subject) ? '#F3F4F6' : 'transparent',
+                    borderRadius: '8px',
+                    border: formData.subjects.includes(subject) ? '2px solid #8B5CF6' : '2px solid #E5E7EB',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={formData.subjects.includes(subject)}
+                    onChange={() => handleSubjectToggle(subject)}
+                    style={{ 
+                      marginRight: '10px',
+                      width: '18px',
+                      height: '18px',
+                      cursor: 'pointer'
+                    }}
+                  />
+                  <span style={{ fontSize: '15px', fontWeight: '500' }}>{subject}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '32px' }}>
+            <label>Key Stages * (Select all that apply)</label>
+            <div style={{ 
+              display: 'flex', 
+              gap: '12px',
+              flexWrap: 'wrap',
+              marginTop: '12px'
+            }}>
+              {KEY_STAGES.map(keyStage => (
+                <label 
+                  key={keyStage} 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    cursor: 'pointer',
+                    padding: '12px 20px',
+                    background: formData.keyStages.includes(keyStage) ? '#8B5CF6' : 'white',
+                    color: formData.keyStages.includes(keyStage) ? 'white' : '#1F2937',
+                    borderRadius: '8px',
+                    border: '2px solid #8B5CF6',
+                    fontWeight: '600',
+                    transition: 'all 0.2s',
+                    minWidth: '100px',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={formData.keyStages.includes(keyStage)}
+                    onChange={() => handleKeyStageToggle(keyStage)}
+                    style={{ display: 'none' }}
+                  />
+                  {keyStage}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {error && (
+            <div style={{ 
+              padding: '16px',
+              background: '#FEE2E2',
+              color: '#DC2626',
+              borderRadius: '8px',
+              marginBottom: '24px',
+              fontSize: '15px'
+            }}>
+              {error}
+            </div>
+          )}
+
+          <button 
+            type="submit" 
+            disabled={loading || formData.subjects.length === 0 || formData.keyStages.length === 0}
+            className="btn-primary"
+            style={{ 
+              width: '100%', 
+              padding: '16px',
+              fontSize: '18px'
+            }}
+          >
+            {loading ? 'Submitting...' : 'Submit Artifact'}
+          </button>
+          
+          {(formData.subjects.length === 0 || formData.keyStages.length === 0) && (
+            <p style={{ 
+              textAlign: 'center',
+              marginTop: '12px',
+              fontSize: '14px',
+              color: '#6B7280'
+            }}>
+              Please select at least one subject and one key stage
+            </p>
+          )}
+        </form>
+      </div>
     </div>
   )
 }
