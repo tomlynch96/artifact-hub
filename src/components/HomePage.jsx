@@ -16,31 +16,82 @@ export default function HomePage() {
         .select(`
           *,
           artifact_subjects(subject),
-          artifact_key_stages(key_stage)
+          artifact_key_stages(key_stage),
+          votes(id)
         `)
         .order('created_at', { ascending: false })
-
+  
       if (error) throw error
-      setArtifacts(data || [])
+      
+      // Count votes for each artifact
+      const artifactsWithVoteCounts = data?.map(artifact => ({
+        ...artifact,
+        voteCount: artifact.votes?.length || 0
+      })) || []
+      
+      setArtifacts(artifactsWithVoteCounts)
     } catch (error) {
       console.error('Error fetching artifacts:', error)
     } finally {
       setLoading(false)
     }
   }
-
+  
   const handleVote = async (artifactId) => {
     try {
-      const { error } = await supabase
-        .from('votes')
-        .insert({ artifact_id: artifactId })
-
-      if (error) throw error
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
       
+      if (userError || !user) {
+        alert('You must be logged in to vote')
+        return
+      }
+  
+      // Check if user already voted
+      const { data: existingVote, error: checkError } = await supabase
+        .from('votes')
+        .select('id')
+        .eq('artifact_id', artifactId)
+        .eq('user_id', user.id)
+        .maybeSingle()
+  
+      if (checkError) {
+        console.error('Error checking existing vote:', checkError)
+        throw checkError
+      }
+  
+      if (existingVote) {
+        // User already voted, so remove the vote (toggle behavior)
+        const { error: deleteError } = await supabase
+          .from('votes')
+          .delete()
+          .eq('artifact_id', artifactId)
+          .eq('user_id', user.id)
+        
+        if (deleteError) {
+          console.error('Error deleting vote:', deleteError)
+          throw deleteError
+        }
+      } else {
+        // User hasn't voted, add a vote
+        const { error: insertError } = await supabase
+          .from('votes')
+          .insert({ 
+            artifact_id: artifactId,
+            user_id: user.id
+          })
+  
+        if (insertError) {
+          console.error('Error inserting vote:', insertError)
+          throw insertError
+        }
+      }
+      
+      // Refresh artifacts to update vote count
       fetchArtifacts()
     } catch (error) {
-      console.error('Error voting:', error)
-      alert('You may have already voted for this artifact')
+      console.error('Full error:', error)
+      alert(`Error updating vote: ${error.message}`)
     }
   }
 
@@ -211,7 +262,7 @@ export default function HomePage() {
                             transition: 'all 0.2s'
                           }}
                         >
-                          ⬆️ {artifact.votes || 0}
+                          ⬆️ {artifact.voteCount || 0}
                         </button>
                       </div>
 
