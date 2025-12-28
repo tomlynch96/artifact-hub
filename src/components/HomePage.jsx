@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
+import { useAuth } from '../AuthContext'
+import SearchFilterBar from './SearchFilterBar'
 
 export default function HomePage() {
+  const { user } = useAuth()
   const [artifacts, setArtifacts] = useState([])
+  const [filteredArtifacts, setFilteredArtifacts] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -11,69 +15,123 @@ export default function HomePage() {
 
   const fetchArtifacts = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch artifacts with related data
+      const { data: artifactsData, error } = await supabase
         .from('artifacts')
         .select(`
           *,
-          artifact_subjects(subject),
-          artifact_key_stages(key_stage),
-          votes(id)
+          artifact_subjects (subject),
+          artifact_key_stages (key_stage)
         `)
         .order('created_at', { ascending: false })
-  
+
       if (error) throw error
-      
-      // Count votes for each artifact
-      const artifactsWithVoteCounts = data?.map(artifact => ({
-        ...artifact,
-        voteCount: artifact.votes?.length || 0
-      })) || []
-      
-      setArtifacts(artifactsWithVoteCounts)
+
+      // Fetch vote counts for each artifact
+      const artifactsWithVotes = await Promise.all(
+        artifactsData.map(async (artifact) => {
+          const { count } = await supabase
+            .from('votes')
+            .select('*', { count: 'exact', head: true })
+            .eq('artifact_id', artifact.id)
+
+          // Check if current user has voted
+          let userHasVoted = false
+          if (user) {
+            const { data: userVote } = await supabase
+              .from('votes')
+              .select('id')
+              .eq('artifact_id', artifact.id)
+              .eq('user_id', user.id)
+              .single()
+            userHasVoted = !!userVote
+          }
+
+          return {
+            ...artifact,
+            voteCount: count || 0,
+            userHasVoted
+          }
+        })
+      )
+
+      setArtifacts(artifactsWithVotes)
+      setFilteredArtifacts(artifactsWithVotes)
     } catch (error) {
       console.error('Error fetching artifacts:', error)
     } finally {
       setLoading(false)
     }
   }
-  
+
+  const handleFiltersChange = (filters) => {
+    let filtered = [...artifacts]
+
+    // Apply text search
+    if (filters.searchText) {
+      const searchLower = filters.searchText.toLowerCase()
+      filtered = filtered.filter(artifact => 
+        artifact.title.toLowerCase().includes(searchLower) ||
+        artifact.description?.toLowerCase().includes(searchLower) ||
+        artifact.first_prompt?.toLowerCase().includes(searchLower)
+      )
+    }
+
+    // Apply subject filters
+    if (filters.subjects.length > 0) {
+      filtered = filtered.filter(artifact => {
+        const artifactSubjects = artifact.artifact_subjects?.map(s => s.subject) || []
+        return filters.subjects.some(subject => artifactSubjects.includes(subject))
+      })
+    }
+
+    // Apply key stage filters
+    if (filters.keyStages.length > 0) {
+      filtered = filtered.filter(artifact => {
+        const artifactKeyStages = artifact.artifact_key_stages?.map(k => k.key_stage) || []
+        return filters.keyStages.some(keyStage => artifactKeyStages.includes(keyStage))
+      })
+    }
+
+    // Apply sorting
+    switch (filters.sortBy) {
+      case 'most_voted':
+        filtered.sort((a, b) => b.voteCount - a.voteCount)
+        break
+      case 'alphabetical':
+        filtered.sort((a, b) => a.title.localeCompare(b.title))
+        break
+      case 'newest':
+      default:
+        filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    }
+
+    setFilteredArtifacts(filtered)
+  }
+
   const handleVote = async (artifactId) => {
+    if (!user) {
+      alert('Please log in to vote')
+      return
+    }
+
     try {
-      // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      const artifact = artifacts.find(a => a.id === artifactId)
       
-      if (userError || !user) {
-        alert('You must be logged in to vote')
-        return
-      }
-  
-      // Check if user already voted
-      const { data: existingVote, error: checkError } = await supabase
-        .from('votes')
-        .select('id')
-        .eq('artifact_id', artifactId)
-        .eq('user_id', user.id)
-        .maybeSingle()
-  
-      if (checkError) {
-        console.error('Error checking existing vote:', checkError)
-        throw checkError
-      }
-  
-      if (existingVote) {
-        // User already voted, so remove the vote (toggle behavior)
+      if (artifact.userHasVoted) {
+        // Remove vote
         const { error: deleteError } = await supabase
           .from('votes')
           .delete()
           .eq('artifact_id', artifactId)
           .eq('user_id', user.id)
-        
+
         if (deleteError) {
           console.error('Error deleting vote:', deleteError)
           throw deleteError
         }
       } else {
-        // User hasn't voted, add a vote
+        // Add vote
         const { error: insertError } = await supabase
           .from('votes')
           .insert({ 
@@ -117,7 +175,10 @@ export default function HomePage() {
 
       <div className="page-section">
         <div className="container">
-          {artifacts.length === 0 ? (
+          {/* Search and Filter Bar */}
+          <SearchFilterBar onFiltersChange={handleFiltersChange} />
+
+          {filteredArtifacts.length === 0 ? (
             <div style={{ 
               textAlign: 'center', 
               padding: '60px 20px',
@@ -128,63 +189,60 @@ export default function HomePage() {
               boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
             }}>
               <div style={{ fontSize: '64px', marginBottom: '20px', opacity: '0.3' }}>
-                📚
+                {artifacts.length === 0 ? '📚' : '🔍'}
               </div>
               <h2 style={{ fontSize: 'clamp(24px, 4vw, 32px)', marginBottom: '16px', color: '#1F2937', fontWeight: '700' }}>
-                No artifacts yet
+                {artifacts.length === 0 ? 'No artifacts yet' : 'No matching artifacts'}
               </h2>
               <p style={{ color: '#6B7280', marginBottom: '32px', fontSize: 'clamp(16px, 2vw, 18px)', lineHeight: '1.6' }}>
-                Be the first to share a Claude-created teaching resource!
+                {artifacts.length === 0 
+                  ? 'Be the first to share a Claude-created teaching resource!'
+                  : 'Try adjusting your search or filters to find what you\'re looking for.'
+                }
               </p>
             </div>
           ) : (
             <>
               <div className="section-header">
-                <h2 className="section-title">Recent Artifacts</h2>
+                <h2 className="section-title">
+                  {filteredArtifacts.length === artifacts.length 
+                    ? 'All Artifacts' 
+                    : `${filteredArtifacts.length} ${filteredArtifacts.length === 1 ? 'Artifact' : 'Artifacts'} Found`
+                  }
+                </h2>
                 <p className="section-subtitle">
-                  {artifacts.length} {artifacts.length === 1 ? 'resource' : 'resources'} shared by teachers
+                  {filteredArtifacts.length === artifacts.length 
+                    ? `${artifacts.length} ${artifacts.length === 1 ? 'resource' : 'resources'} available`
+                    : `Showing ${filteredArtifacts.length} of ${artifacts.length} total`
+                  }
                 </p>
               </div>
-              
-              <div className="artifact-grid">
-                {artifacts.map((artifact) => (
-                  <div 
-                    key={artifact.id} 
-                    className="card"
-                    style={{ 
-                      padding: '0',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      height: '100%'
-                    }}
-                  >
-                    {artifact.screenshot_url && (
-                      <div style={{ 
-                        width: '100%', 
-                        height: '200px',
-                        overflow: 'hidden',
-                        background: '#F3F4F6'
-                      }}>
-                        <img 
-                          src={artifact.screenshot_url} 
-                          alt={artifact.title}
-                          style={{ 
-                            width: '100%', 
-                            height: '100%', 
-                            objectFit: 'cover',
-                            transition: 'transform 0.3s'
-                          }}
-                        />
-                      </div>
-                    )}
-                    
-                    <div style={{ padding: '20px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+
+              <div className="grid">
+                {filteredArtifacts.map((artifact) => (
+                  <div key={artifact.id} className="card">
+                    <div style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      height: '100%' 
+                    }}>
+                      <img 
+                        src={artifact.screenshot_url} 
+                        alt={artifact.title}
+                        style={{ 
+                          width: '100%', 
+                          height: '200px', 
+                          objectFit: 'cover', 
+                          borderRadius: '12px 12px 0 0',
+                          marginBottom: '16px'
+                        }}
+                      />
+                      
                       <h3 style={{ 
                         fontSize: 'clamp(18px, 3vw, 22px)', 
                         marginBottom: '12px',
-                        color: '#1F2937',
                         fontWeight: '700',
+                        color: '#1F2937',
                         lineHeight: '1.3'
                       }}>
                         {artifact.title}
@@ -192,9 +250,9 @@ export default function HomePage() {
                       
                       {artifact.description && (
                         <p style={{ 
-                          color: '#4B5563', 
+                          fontSize: '14px', 
+                          color: '#6B7280', 
                           marginBottom: '16px',
-                          fontSize: 'clamp(14px, 2vw, 15px)',
                           lineHeight: '1.6',
                           flexGrow: 1
                         }}>
@@ -249,8 +307,8 @@ export default function HomePage() {
                         <button 
                           onClick={() => handleVote(artifact.id)}
                           style={{ 
-                            background: '#F9FAFB',
-                            border: '2px solid #E5E7EB',
+                            background: artifact.userHasVoted ? '#FFF7ED' : '#F9FAFB',
+                            border: artifact.userHasVoted ? '2px solid #EA580C' : '2px solid #E5E7EB',
                             padding: '6px 12px',
                             borderRadius: '8px',
                             cursor: 'pointer',
@@ -259,7 +317,8 @@ export default function HomePage() {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '4px',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            color: artifact.userHasVoted ? '#EA580C' : '#4B5563'
                           }}
                         >
                           ⬆️ {artifact.voteCount || 0}
@@ -270,7 +329,7 @@ export default function HomePage() {
                         <details style={{ marginTop: '16px' }}>
                           <summary style={{ 
                             cursor: 'pointer',
-                            color: '#8B5CF6',
+                            color: '#EA580C',
                             fontWeight: '600',
                             fontSize: '13px',
                             padding: '12px 0',
@@ -287,7 +346,7 @@ export default function HomePage() {
                             color: '#4B5563',
                             fontStyle: 'italic',
                             lineHeight: '1.6',
-                            borderLeft: '3px solid #8B5CF6'
+                            borderLeft: '3px solid #EA580C'
                           }}>
                             "{artifact.first_prompt}"
                           </p>
