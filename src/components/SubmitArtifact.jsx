@@ -138,7 +138,7 @@ export default function SubmitArtifact({ onSuccess }) {
                 placeholder="https://claude.ai/public/artifacts/..."
                 required
               />
-              <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '6px' }}>
+              <p style={{ fontSize: '13px', color: 'var(--text-gray)', marginTop: '6px' }}>
                 Paste the share link from your Claude artifact
               </p>
             </div>
@@ -189,9 +189,9 @@ export default function SubmitArtifact({ onSuccess }) {
                       alignItems: 'center', 
                       cursor: 'pointer',
                       padding: '10px',
-                      background: formData.subjects.includes(subject) ? '#F3F4F6' : 'transparent',
+                      background: formData.subjects.includes(subject) ? 'var(--selected-bg)' : 'transparent',
                       borderRadius: '6px',
-                      border: formData.subjects.includes(subject) ? '2px solid #8B5CF6' : '2px solid #E5E7EB',
+                      border: formData.subjects.includes(subject) ? '2px solid var(--border-terracotta)' : '2px solid var(--border-color)',
                       transition: 'all 0.2s',
                       fontSize: '14px'
                     }}
@@ -217,10 +217,10 @@ export default function SubmitArtifact({ onSuccess }) {
                     style={{ 
                       cursor: 'pointer',
                       padding: '10px 18px',
-                      background: formData.keyStages.includes(keyStage) ? '#8B5CF6' : 'white',
-                      color: formData.keyStages.includes(keyStage) ? 'white' : '#1F2937',
+                      background: formData.keyStages.includes(keyStage) ? 'var(--btn-primary-bg)' : 'var(--background-white)',
+                      color: formData.keyStages.includes(keyStage) ? 'var(--btn-primary-text)' : 'var(--text-dark)',
                       borderRadius: '8px',
-                      border: '2px solid #8B5CF6',
+                      border: '2px solid var(--border-terracotta)',
                       fontWeight: '600',
                       transition: 'all 0.2s',
                       fontSize: '14px'
@@ -241,8 +241,8 @@ export default function SubmitArtifact({ onSuccess }) {
             {error && (
               <div style={{ 
                 padding: '14px',
-                background: '#FEE2E2',
-                color: '#DC2626',
+                background: 'var(--error-bg)',
+                color: 'var(--error-text)',
                 borderRadius: '8px',
                 marginBottom: '20px',
                 fontSize: '14px'

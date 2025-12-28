@@ -34,7 +34,7 @@ export default function Auth() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)'
+      background: 'linear-gradient(135deg, var(--primary-terracotta) 0%, var(--primary-terracotta-dark) 100%)'
     }}>
       <div className="card" style={{ 
         maxWidth: '450px', 
@@ -42,10 +42,17 @@ export default function Auth() {
         padding: '40px'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <h1 style={{ fontSize: '32px', marginBottom: '8px', color: '#8B5CF6' }}>
+          <h1 style={{ 
+            fontSize: '32px', 
+            marginBottom: '8px', 
+            color: 'var(--primary-terracotta)' 
+          }}>
             Teacher Artifact Library
           </h1>
-          <p style={{ color: '#6B7280', fontSize: '16px' }}>
+          <p style={{ 
+            color: 'var(--text-gray)', 
+            fontSize: '16px' 
+          }}>
             {isSignUp ? 'Create your account' : 'Welcome back'}
           </p>
         </div>
@@ -73,8 +80,8 @@ export default function Auth() {
           </div>
           {error && (
             <p style={{ 
-              color: '#EF4444', 
-              background: '#FEE2E2',
+              color: 'var(--error-text)', 
+              background: 'var(--error-bg)',
               padding: '12px',
               borderRadius: '8px',
               marginBottom: '20px',
@@ -97,9 +104,12 @@ export default function Auth() {
           marginTop: '24px', 
           textAlign: 'center',
           paddingTop: '24px',
-          borderTop: '1px solid #E5E7EB'
+          borderTop: '1px solid var(--border-color)'
         }}>
-          <p style={{ color: '#6B7280', marginBottom: '8px' }}>
+          <p style={{ 
+            color: 'var(--text-gray)', 
+            marginBottom: '8px' 
+          }}>
             {isSignUp ? 'Already have an account?' : "Don't have an account?"}
           </p>
           <button 

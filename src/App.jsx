@@ -17,7 +17,7 @@ function AppContent() {
         justifyContent: 'center',
         minHeight: '100vh',
         fontSize: '18px',
-        color: '#6B7280'
+        color: 'var(--text-gray)'
       }}>
         Loading...
       </div>
@@ -38,7 +38,7 @@ function AppContent() {
               onClick={() => setCurrentPage('home')}
               style={{
                 fontWeight: currentPage === 'home' ? '600' : '500',
-                color: currentPage === 'home' ? '#8B5CF6' : '#6B7280'
+                color: currentPage === 'home' ? 'var(--primary-terracotta)' : 'var(--text-gray)'
               }}
             >
               Browse
@@ -46,8 +46,8 @@ function AppContent() {
             <button 
               onClick={() => setCurrentPage('submit')}
               style={{
-                background: currentPage === 'submit' ? '#8B5CF6' : 'transparent',
-                color: currentPage === 'submit' ? 'white' : '#6B7280',
+                background: currentPage === 'submit' ? 'var(--btn-primary-bg)' : 'transparent',
+                color: currentPage === 'submit' ? 'var(--btn-primary-text)' : 'var(--text-gray)',
                 fontWeight: '600'
               }}
             >
@@ -61,7 +61,7 @@ function AppContent() {
               style={{
                 padding: '8px 16px',
                 background: 'transparent',
-                border: '1px solid #E5E7EB',
+                border: '1px solid var(--border-color)',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontSize: '14px',
