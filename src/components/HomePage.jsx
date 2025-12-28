@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../AuthContext'
 import SearchFilterBar from './SearchFilterBar'
+import EditArtifactModal from './EditArtifactModal'
 
 export default function HomePage() {
   const { user } = useAuth()
   const [artifacts, setArtifacts] = useState([])
   const [filteredArtifacts, setFilteredArtifacts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [editingArtifact, setEditingArtifact] = useState(null)
 
   useEffect(() => {
     fetchArtifacts()
@@ -50,7 +52,8 @@ export default function HomePage() {
           return {
             ...artifact,
             voteCount: count || 0,
-            userHasVoted
+            userHasVoted,
+            isOwner: user && artifact.user_id === user.id
           }
         })
       )
@@ -153,6 +156,38 @@ export default function HomePage() {
     }
   }
 
+  const handleDelete = async (artifactId, artifactTitle) => {
+    if (!window.confirm(`Are you sure you want to delete "${artifactTitle}"? This cannot be undone.`)) {
+      return
+    }
+
+    try {
+      // Delete related records first (handled by cascade in DB, but being explicit)
+      await supabase.from('artifact_subjects').delete().eq('artifact_id', artifactId)
+      await supabase.from('artifact_key_stages').delete().eq('artifact_id', artifactId)
+      await supabase.from('votes').delete().eq('artifact_id', artifactId)
+      
+      // Delete the artifact
+      const { error } = await supabase
+        .from('artifacts')
+        .delete()
+        .eq('id', artifactId)
+
+      if (error) throw error
+
+      alert('Artifact deleted successfully')
+      fetchArtifacts()
+    } catch (error) {
+      console.error('Error deleting artifact:', error)
+      alert(`Error deleting artifact: ${error.message}`)
+    }
+  }
+
+  const handleEditSuccess = () => {
+    setEditingArtifact(null)
+    fetchArtifacts()
+  }
+
   if (loading) {
     return (
       <div style={{ 
@@ -226,6 +261,24 @@ export default function HomePage() {
                       flexDirection: 'column', 
                       height: '100%' 
                     }}>
+                      {/* Owner Badge */}
+                      {artifact.isOwner && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          background: '#EA580C',
+                          color: 'white',
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          zIndex: 1
+                        }}>
+                          Your Post
+                        </div>
+                      )}
+
                       <img 
                         src={artifact.screenshot_url} 
                         alt={artifact.title}
@@ -279,6 +332,58 @@ export default function HomePage() {
                           </span>
                         )}
                       </div>
+
+                      {/* Edit/Delete Buttons for Owner */}
+                      {artifact.isOwner && (
+                        <div style={{
+                          display: 'flex',
+                          gap: '8px',
+                          marginBottom: '12px',
+                          paddingBottom: '12px',
+                          borderBottom: '1px solid #E5E7EB'
+                        }}>
+                          <button
+                            onClick={() => setEditingArtifact(artifact)}
+                            style={{
+                              flex: 1,
+                              padding: '8px 12px',
+                              background: '#FFF7ED',
+                              border: '2px solid #EA580C',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              color: '#EA580C',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(artifact.id, artifact.title)}
+                            style={{
+                              flex: 1,
+                              padding: '8px 12px',
+                              background: '#FEE2E2',
+                              border: '2px solid #EF4444',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              color: '#DC2626',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
+                      )}
 
                       <div style={{ 
                         display: 'flex', 
@@ -360,6 +465,15 @@ export default function HomePage() {
           )}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {editingArtifact && (
+        <EditArtifactModal
+          artifact={editingArtifact}
+          onClose={() => setEditingArtifact(null)}
+          onSuccess={handleEditSuccess}
+        />
+      )}
     </div>
   )
 }
