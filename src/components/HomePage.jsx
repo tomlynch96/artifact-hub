@@ -186,6 +186,12 @@ export default function HomePage() {
   return (
     <div>
       <div className="hero">
+        {/* Translucent shapes */}
+        <div className="shape-1"></div>
+        <div className="shape-2"></div>
+        <div className="shape-3"></div>
+        
+        {/* Content */}
         <h1>Teacher Artifact Library</h1>
         <div className="hero-subtitle">
           <p>Discover and share Claude-created teaching resources for UK secondary education</p>
