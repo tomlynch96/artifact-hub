@@ -187,7 +187,11 @@ export default function HomePage() {
     <div>
       <div className="hero">
         <h1>Teacher Artifact Library</h1>
-        <p>Discover and share Claude-created teaching resources for UK secondary education</p>
+        <div className="hero-subtitle">
+          <p>Discover and share Claude-created teaching resources for UK secondary education</p>
+          <p>Save hours on lesson planning with AI-powered educational content</p>
+          <p>Join a community of innovative educators using Claude AI</p>
+        </div>
       </div>
 
       <div className="page-section">
