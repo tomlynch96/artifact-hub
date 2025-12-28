@@ -5,7 +5,7 @@ export default function SearchFilterBar({ onFiltersChange }) {
   const [searchText, setSearchText] = useState('')
   const [selectedSubjects, setSelectedSubjects] = useState([])
   const [selectedKeyStages, setSelectedKeyStages] = useState([])
-  const [sortBy, setSortBy] = useState('newest') // 'newest', 'most_voted', 'alphabetical'
+  const [sortBy, setSortBy] = useState('newest')
   const [showSubjectsDropdown, setShowSubjectsDropdown] = useState(false)
   const [showKeyStagesDropdown, setShowKeyStagesDropdown] = useState(false)
 
@@ -58,13 +58,12 @@ export default function SearchFilterBar({ onFiltersChange }) {
 
   return (
     <div style={{ 
-      background: 'white', 
+      background: 'var(--background-white)', 
       padding: 'clamp(16px, 3vw, 24px)',
       borderRadius: '12px',
       marginBottom: '32px',
-      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+      boxShadow: 'var(--shadow-sm)'
     }}>
-      {/* Search Bar */}
       <div style={{ marginBottom: '20px' }}>
         <input
           type="text"
@@ -75,17 +74,16 @@ export default function SearchFilterBar({ onFiltersChange }) {
             width: '100%',
             padding: '14px 16px',
             fontSize: '15px',
-            border: '2px solid #E5E7EB',
+            border: '2px solid var(--border-color)',
             borderRadius: '8px',
             outline: 'none',
             transition: 'border-color 0.2s'
           }}
-          onFocus={(e) => e.target.style.borderColor = '#EA580C'}
-          onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
+          onFocus={(e) => e.target.style.borderColor = 'var(--primary-terracotta)'}
+          onBlur={(e) => e.target.style.borderColor = 'var(--border-color)'}
         />
       </div>
 
-      {/* Filter and Sort Controls */}
       <div style={{ 
         display: 'flex', 
         flexWrap: 'wrap', 
@@ -102,8 +100,8 @@ export default function SearchFilterBar({ onFiltersChange }) {
             style={{
               width: '100%',
               padding: '10px 14px',
-              background: selectedSubjects.length > 0 ? '#FFF7ED' : 'white',
-              border: `2px solid ${selectedSubjects.length > 0 ? '#EA580C' : '#E5E7EB'}`,
+              background: selectedSubjects.length > 0 ? 'var(--selected-bg)' : 'var(--background-white)',
+              border: selectedSubjects.length > 0 ? '2px solid var(--border-terracotta)' : '2px solid var(--border-color)',
               borderRadius: '8px',
               fontSize: '14px',
               fontWeight: '600',
@@ -111,7 +109,7 @@ export default function SearchFilterBar({ onFiltersChange }) {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              color: selectedSubjects.length > 0 ? '#EA580C' : '#4B5563'
+              color: selectedSubjects.length > 0 ? 'var(--primary-terracotta)' : 'var(--text-gray)'
             }}
           >
             <span>
@@ -127,10 +125,10 @@ export default function SearchFilterBar({ onFiltersChange }) {
               left: 0,
               right: 0,
               marginTop: '4px',
-              background: 'white',
-              border: '2px solid #E5E7EB',
+              background: 'var(--dropdown-bg)',
+              border: '2px solid var(--dropdown-border)',
               borderRadius: '8px',
-              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+              boxShadow: 'var(--shadow-lg)',
               maxHeight: '300px',
               overflowY: 'auto',
               zIndex: 1000,
@@ -146,12 +144,12 @@ export default function SearchFilterBar({ onFiltersChange }) {
                     cursor: 'pointer',
                     borderRadius: '6px',
                     fontSize: '14px',
-                    background: selectedSubjects.includes(subject) ? '#FFF7ED' : 'transparent',
+                    background: selectedSubjects.includes(subject) ? 'var(--dropdown-selected)' : 'transparent',
                     marginBottom: '2px'
                   }}
                   onMouseEnter={(e) => {
                     if (!selectedSubjects.includes(subject)) {
-                      e.currentTarget.style.background = '#F9FAFB'
+                      e.currentTarget.style.background = 'var(--dropdown-hover)'
                     }
                   }}
                   onMouseLeave={(e) => {
@@ -183,8 +181,8 @@ export default function SearchFilterBar({ onFiltersChange }) {
             style={{
               width: '100%',
               padding: '10px 14px',
-              background: selectedKeyStages.length > 0 ? '#FFF7ED' : 'white',
-              border: `2px solid ${selectedKeyStages.length > 0 ? '#EA580C' : '#E5E7EB'}`,
+              background: selectedKeyStages.length > 0 ? 'var(--selected-bg)' : 'var(--background-white)',
+              border: selectedKeyStages.length > 0 ? '2px solid var(--border-terracotta)' : '2px solid var(--border-color)',
               borderRadius: '8px',
               fontSize: '14px',
               fontWeight: '600',
@@ -192,7 +190,7 @@ export default function SearchFilterBar({ onFiltersChange }) {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              color: selectedKeyStages.length > 0 ? '#EA580C' : '#4B5563'
+              color: selectedKeyStages.length > 0 ? 'var(--primary-terracotta)' : 'var(--text-gray)'
             }}
           >
             <span>
@@ -208,10 +206,10 @@ export default function SearchFilterBar({ onFiltersChange }) {
               left: 0,
               right: 0,
               marginTop: '4px',
-              background: 'white',
-              border: '2px solid #E5E7EB',
+              background: 'var(--dropdown-bg)',
+              border: '2px solid var(--dropdown-border)',
               borderRadius: '8px',
-              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+              boxShadow: 'var(--shadow-lg)',
               zIndex: 1000,
               padding: '8px'
             }}>
@@ -225,12 +223,12 @@ export default function SearchFilterBar({ onFiltersChange }) {
                     cursor: 'pointer',
                     borderRadius: '6px',
                     fontSize: '14px',
-                    background: selectedKeyStages.includes(keyStage) ? '#FFF7ED' : 'transparent',
+                    background: selectedKeyStages.includes(keyStage) ? 'var(--dropdown-selected)' : 'transparent',
                     marginBottom: '2px'
                   }}
                   onMouseEnter={(e) => {
                     if (!selectedKeyStages.includes(keyStage)) {
-                      e.currentTarget.style.background = '#F9FAFB'
+                      e.currentTarget.style.background = 'var(--dropdown-hover)'
                     }
                   }}
                   onMouseLeave={(e) => {
@@ -260,13 +258,13 @@ export default function SearchFilterBar({ onFiltersChange }) {
             style={{
               width: '100%',
               padding: '10px 14px',
-              background: 'white',
-              border: '2px solid #E5E7EB',
+              background: 'var(--background-white)',
+              border: '2px solid var(--border-color)',
               borderRadius: '8px',
               fontSize: '14px',
               fontWeight: '600',
               cursor: 'pointer',
-              color: '#4B5563'
+              color: 'var(--text-gray)'
             }}
           >
             <option value="newest">📅 Most Recent</option>
@@ -281,13 +279,13 @@ export default function SearchFilterBar({ onFiltersChange }) {
             onClick={clearAllFilters}
             style={{
               padding: '10px 16px',
-              background: '#FEE2E2',
-              border: '2px solid #EF4444',
+              background: 'var(--btn-delete-bg)',
+              border: '2px solid var(--btn-delete-border)',
               borderRadius: '8px',
               fontSize: '14px',
               fontWeight: '600',
               cursor: 'pointer',
-              color: '#DC2626',
+              color: 'var(--btn-delete-text)',
               whiteSpace: 'nowrap'
             }}
           >
@@ -301,7 +299,7 @@ export default function SearchFilterBar({ onFiltersChange }) {
         <div style={{ 
           marginTop: '16px', 
           paddingTop: '16px', 
-          borderTop: '1px solid #E5E7EB',
+          borderTop: '1px solid var(--border-color)',
           display: 'flex',
           flexWrap: 'wrap',
           gap: '8px'
@@ -314,12 +312,12 @@ export default function SearchFilterBar({ onFiltersChange }) {
                 alignItems: 'center',
                 gap: '6px',
                 padding: '6px 12px',
-                background: '#FFF7ED',
-                border: '1px solid #FDBA74',
+                background: 'var(--chip-subject-bg)',
+                border: '1px solid var(--chip-subject-border)',
                 borderRadius: '6px',
                 fontSize: '13px',
                 fontWeight: '600',
-                color: '#EA580C'
+                color: 'var(--chip-subject-text)'
               }}
             >
               {subject}
@@ -331,7 +329,7 @@ export default function SearchFilterBar({ onFiltersChange }) {
                   cursor: 'pointer',
                   padding: '0',
                   fontSize: '14px',
-                  color: '#EA580C',
+                  color: 'var(--chip-subject-text)',
                   marginLeft: '4px'
                 }}
               >
@@ -347,12 +345,12 @@ export default function SearchFilterBar({ onFiltersChange }) {
                 alignItems: 'center',
                 gap: '6px',
                 padding: '6px 12px',
-                background: '#DBEAFE',
-                border: '1px solid #93C5FD',
+                background: 'var(--chip-keystage-bg)',
+                border: '1px solid var(--chip-keystage-border)',
                 borderRadius: '6px',
                 fontSize: '13px',
                 fontWeight: '600',
-                color: '#1E40AF'
+                color: 'var(--chip-keystage-text)'
               }}
             >
               {keyStage}
@@ -364,7 +362,7 @@ export default function SearchFilterBar({ onFiltersChange }) {
                   cursor: 'pointer',
                   padding: '0',
                   fontSize: '14px',
-                  color: '#1E40AF',
+                  color: 'var(--chip-keystage-text)',
                   marginLeft: '4px'
                 }}
               >

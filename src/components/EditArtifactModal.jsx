@@ -40,7 +40,6 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
 
       let screenshot_url = artifact.screenshot_url
 
-      // If new screenshot is uploaded, upload it
       if (newScreenshot) {
         const fileExt = newScreenshot.name.split('.').pop()
         const fileName = `${Math.random()}.${fileExt}`
@@ -57,7 +56,6 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
         screenshot_url = publicUrl
       }
 
-      // Update artifact
       const { error: updateError } = await supabase
         .from('artifacts')
         .update({
@@ -71,7 +69,6 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
 
       if (updateError) throw updateError
 
-      // Delete existing subjects and key stages
       await supabase
         .from('artifact_subjects')
         .delete()
@@ -82,7 +79,6 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
         .delete()
         .eq('artifact_id', artifact.id)
 
-      // Insert new subjects
       if (formData.subjects.length > 0) {
         const subjectInserts = formData.subjects.map(subject => ({
           artifact_id: artifact.id,
@@ -94,7 +90,6 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
         if (subjectError) throw subjectError
       }
 
-      // Insert new key stages
       if (formData.keyStages.length > 0) {
         const keyStageInserts = formData.keyStages.map(keyStage => ({
           artifact_id: artifact.id,
@@ -141,7 +136,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(0, 0, 0, 0.5)',
+      background: 'var(--modal-overlay)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -150,7 +145,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
       overflowY: 'auto'
     }}>
       <div style={{
-        background: 'white',
+        background: 'var(--modal-bg)',
         borderRadius: '16px',
         maxWidth: '800px',
         width: '100%',
@@ -168,7 +163,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
           <h2 style={{
             fontSize: 'clamp(24px, 4vw, 32px)',
             fontWeight: '700',
-            color: '#1F2937',
+            color: 'var(--text-dark)',
             margin: 0
           }}>
             Edit Artifact
@@ -180,7 +175,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
               border: 'none',
               fontSize: '28px',
               cursor: 'pointer',
-              color: '#6B7280',
+              color: 'var(--text-gray)',
               padding: '0',
               lineHeight: '1'
             }}
@@ -195,7 +190,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
               display: 'block',
               fontWeight: '600',
               marginBottom: '8px',
-              color: '#374151',
+              color: 'var(--text-dark)',
               fontSize: '14px'
             }}>
               Artifact Title *
@@ -210,7 +205,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
                 width: '100%',
                 padding: '12px',
                 fontSize: '15px',
-                border: '2px solid #E5E7EB',
+                border: '2px solid var(--border-color)',
                 borderRadius: '8px',
                 outline: 'none'
               }}
@@ -222,7 +217,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
               display: 'block',
               fontWeight: '600',
               marginBottom: '8px',
-              color: '#374151',
+              color: 'var(--text-dark)',
               fontSize: '14px'
             }}>
               Claude Artifact URL *
@@ -237,7 +232,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
                 width: '100%',
                 padding: '12px',
                 fontSize: '15px',
-                border: '2px solid #E5E7EB',
+                border: '2px solid var(--border-color)',
                 borderRadius: '8px',
                 outline: 'none'
               }}
@@ -249,7 +244,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
               display: 'block',
               fontWeight: '600',
               marginBottom: '8px',
-              color: '#374151',
+              color: 'var(--text-dark)',
               fontSize: '14px'
             }}>
               Screenshot {newScreenshot ? '(New)' : '(Optional - leave blank to keep current)'}
@@ -262,7 +257,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
                 width: '100%',
                 padding: '12px',
                 fontSize: '14px',
-                border: '2px solid #E5E7EB',
+                border: '2px solid var(--border-color)',
                 borderRadius: '8px',
                 cursor: 'pointer'
               }}
@@ -276,7 +271,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
                   width: '100%',
                   maxWidth: '300px',
                   borderRadius: '8px',
-                  border: '2px solid #E5E7EB'
+                  border: '2px solid var(--border-color)'
                 }}
               />
             )}
@@ -287,7 +282,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
               display: 'block',
               fontWeight: '600',
               marginBottom: '8px',
-              color: '#374151',
+              color: 'var(--text-dark)',
               fontSize: '14px'
             }}>
               How to Use in Lessons
@@ -301,7 +296,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
                 width: '100%',
                 padding: '12px',
                 fontSize: '15px',
-                border: '2px solid #E5E7EB',
+                border: '2px solid var(--border-color)',
                 borderRadius: '8px',
                 outline: 'none',
                 fontFamily: 'inherit',
@@ -315,7 +310,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
               display: 'block',
               fontWeight: '600',
               marginBottom: '8px',
-              color: '#374151',
+              color: 'var(--text-dark)',
               fontSize: '14px'
             }}>
               Original Prompt (Optional)
@@ -329,7 +324,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
                 width: '100%',
                 padding: '12px',
                 fontSize: '15px',
-                border: '2px solid #E5E7EB',
+                border: '2px solid var(--border-color)',
                 borderRadius: '8px',
                 outline: 'none',
                 fontFamily: 'inherit',
@@ -343,7 +338,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
               display: 'block',
               fontWeight: '600',
               marginBottom: '12px',
-              color: '#374151',
+              color: 'var(--text-dark)',
               fontSize: '14px'
             }}>
               Subjects *
@@ -361,9 +356,9 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
                     alignItems: 'center', 
                     cursor: 'pointer',
                     padding: '10px',
-                    background: formData.subjects.includes(subject) ? '#FFF7ED' : 'transparent',
+                    background: formData.subjects.includes(subject) ? 'var(--selected-bg)' : 'transparent',
                     borderRadius: '6px',
-                    border: formData.subjects.includes(subject) ? '2px solid #EA580C' : '2px solid #E5E7EB',
+                    border: formData.subjects.includes(subject) ? '2px solid var(--border-terracotta)' : '2px solid var(--border-color)',
                     transition: 'all 0.2s',
                     fontSize: '14px'
                   }}
@@ -385,7 +380,7 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
               display: 'block',
               fontWeight: '600',
               marginBottom: '12px',
-              color: '#374151',
+              color: 'var(--text-dark)',
               fontSize: '14px'
             }}>
               Key Stages *
@@ -397,10 +392,10 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
                   style={{ 
                     cursor: 'pointer',
                     padding: '10px 18px',
-                    background: formData.keyStages.includes(keyStage) ? '#EA580C' : 'white',
-                    color: formData.keyStages.includes(keyStage) ? 'white' : '#1F2937',
+                    background: formData.keyStages.includes(keyStage) ? 'var(--btn-primary-bg)' : 'var(--background-white)',
+                    color: formData.keyStages.includes(keyStage) ? 'var(--btn-primary-text)' : 'var(--text-dark)',
                     borderRadius: '8px',
-                    border: '2px solid #EA580C',
+                    border: '2px solid var(--border-terracotta)',
                     fontWeight: '600',
                     transition: 'all 0.2s',
                     fontSize: '14px'
@@ -421,8 +416,8 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
           {error && (
             <div style={{ 
               padding: '14px',
-              background: '#FEE2E2',
-              color: '#DC2626',
+              background: 'var(--error-bg)',
+              color: 'var(--error-text)',
               borderRadius: '8px',
               marginBottom: '20px',
               fontSize: '14px'
@@ -441,13 +436,13 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
               onClick={onClose}
               style={{
                 padding: '12px 24px',
-                background: 'white',
-                border: '2px solid #E5E7EB',
+                background: 'var(--btn-secondary-bg)',
+                border: '2px solid var(--btn-secondary-border)',
                 borderRadius: '8px',
                 fontSize: '16px',
                 fontWeight: '600',
                 cursor: 'pointer',
-                color: '#6B7280'
+                color: 'var(--btn-secondary-text)'
               }}
             >
               Cancel
@@ -457,13 +452,13 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
               disabled={loading || formData.subjects.length === 0 || formData.keyStages.length === 0}
               style={{
                 padding: '12px 24px',
-                background: loading ? '#9CA3AF' : '#EA580C',
+                background: loading ? 'var(--text-light-gray)' : 'var(--btn-primary-bg)',
                 border: 'none',
                 borderRadius: '8px',
                 fontSize: '16px',
                 fontWeight: '600',
                 cursor: loading ? 'not-allowed' : 'pointer',
-                color: 'white'
+                color: 'var(--btn-primary-text)'
               }}
             >
               {loading ? 'Saving...' : 'Save Changes'}

@@ -17,7 +17,6 @@ export default function HomePage() {
 
   const fetchArtifacts = async () => {
     try {
-      // Fetch artifacts with related data
       const { data: artifactsData, error } = await supabase
         .from('artifacts')
         .select(`
@@ -29,7 +28,6 @@ export default function HomePage() {
 
       if (error) throw error
 
-      // Fetch vote counts for each artifact
       const artifactsWithVotes = await Promise.all(
         artifactsData.map(async (artifact) => {
           const { count } = await supabase
@@ -37,7 +35,6 @@ export default function HomePage() {
             .select('*', { count: 'exact', head: true })
             .eq('artifact_id', artifact.id)
 
-          // Check if current user has voted
           let userHasVoted = false
           if (user) {
             const { data: userVote } = await supabase
@@ -70,7 +67,6 @@ export default function HomePage() {
   const handleFiltersChange = (filters) => {
     let filtered = [...artifacts]
 
-    // Apply text search
     if (filters.searchText) {
       const searchLower = filters.searchText.toLowerCase()
       filtered = filtered.filter(artifact => 
@@ -80,7 +76,6 @@ export default function HomePage() {
       )
     }
 
-    // Apply subject filters
     if (filters.subjects.length > 0) {
       filtered = filtered.filter(artifact => {
         const artifactSubjects = artifact.artifact_subjects?.map(s => s.subject) || []
@@ -88,7 +83,6 @@ export default function HomePage() {
       })
     }
 
-    // Apply key stage filters
     if (filters.keyStages.length > 0) {
       filtered = filtered.filter(artifact => {
         const artifactKeyStages = artifact.artifact_key_stages?.map(k => k.key_stage) || []
@@ -96,7 +90,6 @@ export default function HomePage() {
       })
     }
 
-    // Apply sorting
     switch (filters.sortBy) {
       case 'most_voted':
         filtered.sort((a, b) => b.voteCount - a.voteCount)
@@ -122,19 +115,14 @@ export default function HomePage() {
       const artifact = artifacts.find(a => a.id === artifactId)
       
       if (artifact.userHasVoted) {
-        // Remove vote
         const { error: deleteError } = await supabase
           .from('votes')
           .delete()
           .eq('artifact_id', artifactId)
           .eq('user_id', user.id)
 
-        if (deleteError) {
-          console.error('Error deleting vote:', deleteError)
-          throw deleteError
-        }
+        if (deleteError) throw deleteError
       } else {
-        // Add vote
         const { error: insertError } = await supabase
           .from('votes')
           .insert({ 
@@ -142,13 +130,9 @@ export default function HomePage() {
             user_id: user.id
           })
   
-        if (insertError) {
-          console.error('Error inserting vote:', insertError)
-          throw insertError
-        }
+        if (insertError) throw insertError
       }
       
-      // Refresh artifacts to update vote count
       fetchArtifacts()
     } catch (error) {
       console.error('Full error:', error)
@@ -162,12 +146,10 @@ export default function HomePage() {
     }
 
     try {
-      // Delete related records first (handled by cascade in DB, but being explicit)
       await supabase.from('artifact_subjects').delete().eq('artifact_id', artifactId)
       await supabase.from('artifact_key_stages').delete().eq('artifact_id', artifactId)
       await supabase.from('votes').delete().eq('artifact_id', artifactId)
       
-      // Delete the artifact
       const { error } = await supabase
         .from('artifacts')
         .delete()
@@ -194,7 +176,7 @@ export default function HomePage() {
         textAlign: 'center', 
         padding: '100px 20px',
         fontSize: '18px',
-        color: '#6B7280'
+        color: 'var(--text-gray)'
       }}>
         Loading artifacts...
       </div>
@@ -210,26 +192,35 @@ export default function HomePage() {
 
       <div className="page-section">
         <div className="container">
-          {/* Search and Filter Bar */}
           <SearchFilterBar onFiltersChange={handleFiltersChange} />
 
           {filteredArtifacts.length === 0 ? (
             <div style={{ 
               textAlign: 'center', 
               padding: '60px 20px',
-              background: 'white',
+              background: 'var(--background-white)',
               borderRadius: '16px',
               maxWidth: '600px',
               margin: '0 auto',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
+              boxShadow: 'var(--shadow-md)'
             }}>
               <div style={{ fontSize: '64px', marginBottom: '20px', opacity: '0.3' }}>
                 {artifacts.length === 0 ? '📚' : '🔍'}
               </div>
-              <h2 style={{ fontSize: 'clamp(24px, 4vw, 32px)', marginBottom: '16px', color: '#1F2937', fontWeight: '700' }}>
+              <h2 style={{ 
+                fontSize: 'clamp(24px, 4vw, 32px)', 
+                marginBottom: '16px', 
+                color: 'var(--text-dark)', 
+                fontWeight: '700' 
+              }}>
                 {artifacts.length === 0 ? 'No artifacts yet' : 'No matching artifacts'}
               </h2>
-              <p style={{ color: '#6B7280', marginBottom: '32px', fontSize: 'clamp(16px, 2vw, 18px)', lineHeight: '1.6' }}>
+              <p style={{ 
+                color: 'var(--text-gray)', 
+                marginBottom: '32px', 
+                fontSize: 'clamp(16px, 2vw, 18px)', 
+                lineHeight: '1.6' 
+              }}>
                 {artifacts.length === 0 
                   ? 'Be the first to share a Claude-created teaching resource!'
                   : 'Try adjusting your search or filters to find what you\'re looking for.'
@@ -261,14 +252,13 @@ export default function HomePage() {
                       flexDirection: 'column', 
                       height: '100%' 
                     }}>
-                      {/* Owner Badge */}
                       {artifact.isOwner && (
                         <div style={{
                           position: 'absolute',
                           top: '12px',
                           right: '12px',
-                          background: '#EA580C',
-                          color: 'white',
+                          background: 'var(--tag-owner-bg)',
+                          color: 'var(--tag-owner-text)',
                           padding: '4px 10px',
                           borderRadius: '6px',
                           fontSize: '12px',
@@ -295,7 +285,7 @@ export default function HomePage() {
                         fontSize: 'clamp(18px, 3vw, 22px)', 
                         marginBottom: '12px',
                         fontWeight: '700',
-                        color: '#1F2937',
+                        color: 'var(--text-dark)',
                         lineHeight: '1.3'
                       }}>
                         {artifact.title}
@@ -304,7 +294,7 @@ export default function HomePage() {
                       {artifact.description && (
                         <p style={{ 
                           fontSize: '14px', 
-                          color: '#6B7280', 
+                          color: 'var(--text-gray)', 
                           marginBottom: '16px',
                           lineHeight: '1.6',
                           flexGrow: 1
@@ -327,33 +317,32 @@ export default function HomePage() {
                           </span>
                         ))}
                         {artifact.artifact_subjects?.length > 2 && (
-                          <span className="tag" style={{ background: '#9CA3AF' }}>
+                          <span className="tag" style={{ background: 'var(--text-light-gray)' }}>
                             +{artifact.artifact_subjects.length - 2}
                           </span>
                         )}
                       </div>
 
-                      {/* Edit/Delete Buttons for Owner */}
                       {artifact.isOwner && (
                         <div style={{
                           display: 'flex',
                           gap: '8px',
                           marginBottom: '12px',
                           paddingBottom: '12px',
-                          borderBottom: '1px solid #E5E7EB'
+                          borderBottom: '1px solid var(--border-color)'
                         }}>
                           <button
                             onClick={() => setEditingArtifact(artifact)}
                             style={{
                               flex: 1,
                               padding: '8px 12px',
-                              background: '#FFF7ED',
-                              border: '2px solid #EA580C',
+                              background: 'var(--selected-bg)',
+                              border: '2px solid var(--border-terracotta)',
                               borderRadius: '8px',
                               fontSize: '13px',
                               fontWeight: '600',
                               cursor: 'pointer',
-                              color: '#EA580C',
+                              color: 'var(--primary-terracotta)',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
@@ -367,13 +356,13 @@ export default function HomePage() {
                             style={{
                               flex: 1,
                               padding: '8px 12px',
-                              background: '#FEE2E2',
-                              border: '2px solid #EF4444',
+                              background: 'var(--btn-delete-bg)',
+                              border: '2px solid var(--btn-delete-border)',
                               borderRadius: '8px',
                               fontSize: '13px',
                               fontWeight: '600',
                               cursor: 'pointer',
-                              color: '#DC2626',
+                              color: 'var(--btn-delete-text)',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
@@ -390,7 +379,7 @@ export default function HomePage() {
                         justifyContent: 'space-between', 
                         alignItems: 'center',
                         paddingTop: '16px',
-                        borderTop: '1px solid #E5E7EB',
+                        borderTop: '1px solid var(--border-color)',
                         marginTop: 'auto',
                         gap: '12px',
                         flexWrap: 'wrap'
@@ -412,8 +401,8 @@ export default function HomePage() {
                         <button 
                           onClick={() => handleVote(artifact.id)}
                           style={{ 
-                            background: artifact.userHasVoted ? '#FFF7ED' : '#F9FAFB',
-                            border: artifact.userHasVoted ? '2px solid #EA580C' : '2px solid #E5E7EB',
+                            background: artifact.userHasVoted ? 'var(--vote-active-bg)' : 'var(--vote-default-bg)',
+                            border: artifact.userHasVoted ? '2px solid var(--vote-active-border)' : '2px solid var(--vote-default-border)',
                             padding: '6px 12px',
                             borderRadius: '8px',
                             cursor: 'pointer',
@@ -423,7 +412,7 @@ export default function HomePage() {
                             alignItems: 'center',
                             gap: '4px',
                             transition: 'all 0.2s',
-                            color: artifact.userHasVoted ? '#EA580C' : '#4B5563'
+                            color: artifact.userHasVoted ? 'var(--vote-active-text)' : 'var(--vote-default-text)'
                           }}
                         >
                           ⬆️ {artifact.voteCount || 0}
@@ -434,24 +423,24 @@ export default function HomePage() {
                         <details style={{ marginTop: '16px' }}>
                           <summary style={{ 
                             cursor: 'pointer',
-                            color: '#EA580C',
+                            color: 'var(--primary-terracotta)',
                             fontWeight: '600',
                             fontSize: '13px',
                             padding: '12px 0',
-                            borderTop: '1px solid #E5E7EB'
+                            borderTop: '1px solid var(--border-color)'
                           }}>
                             💡 Original Prompt
                           </summary>
                           <p style={{ 
                             marginTop: '8px',
                             padding: '12px',
-                            background: '#F9FAFB',
+                            background: 'var(--background-light-gray)',
                             borderRadius: '6px',
                             fontSize: '13px',
-                            color: '#4B5563',
+                            color: 'var(--text-gray)',
                             fontStyle: 'italic',
                             lineHeight: '1.6',
-                            borderLeft: '3px solid #EA580C'
+                            borderLeft: '3px solid var(--border-terracotta)'
                           }}>
                             "{artifact.first_prompt}"
                           </p>
@@ -466,7 +455,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Edit Modal */}
       {editingArtifact && (
         <EditArtifactModal
           artifact={editingArtifact}
