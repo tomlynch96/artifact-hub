@@ -14,6 +14,7 @@ export default function HomePage() {
   const [filteredArtifacts, setFilteredArtifacts] = useState([])
   const [loading, setLoading] = useState(true)
   const [editingArtifact, setEditingArtifact] = useState(null)
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
 
   useEffect(() => {
     fetchArtifacts()
@@ -40,6 +41,9 @@ export default function HomePage() {
             .eq('artifact_id', artifact.id)
 
           let userHasVoted = false
+          let userHasFavorited = false
+          let favoriteCount = 0
+
           if (user) {
             const { data: userVote } = await supabase
               .from('votes')
@@ -48,12 +52,30 @@ export default function HomePage() {
               .eq('user_id', user.id)
               .single()
             userHasVoted = !!userVote
+
+            // Check if user favorited this artifact
+            const { data: userFavorite } = await supabase
+              .from('favorites')
+              .select('id')
+              .eq('artifact_id', artifact.id)
+              .eq('user_id', user.id)
+              .single()
+            userHasFavorited = !!userFavorite
           }
+
+          // Get favorite count
+          const { count: favCount } = await supabase
+            .from('favorites')
+            .select('*', { count: 'exact', head: true })
+            .eq('artifact_id', artifact.id)
+          favoriteCount = favCount || 0
 
           return {
             ...artifact,
             voteCount: count || 0,
             userHasVoted,
+            userHasFavorited,
+            favoriteCount,
             isOwner: artifact.user_id === user?.id
           }
         })
@@ -94,8 +116,39 @@ export default function HomePage() {
     }
   }
 
+  const handleFavorite = async (artifactId, currentlyFavorited) => {
+    if (!user) return
+
+    try {
+      if (currentlyFavorited) {
+        await supabase
+          .from('favorites')
+          .delete()
+          .eq('artifact_id', artifactId)
+          .eq('user_id', user.id)
+      } else {
+        await supabase
+          .from('favorites')
+          .insert({
+            artifact_id: artifactId,
+            user_id: user.id
+          })
+      }
+      
+      fetchArtifacts()
+    } catch (error) {
+      console.error('Error updating favorite:', error)
+      alert('Error updating favorite. Please try again.')
+    }
+  }
+
   const handleFiltersChange = (filters) => {
     let filtered = [...artifacts]
+
+    // Apply favorites filter first
+    if (showFavoritesOnly) {
+      filtered = filtered.filter(artifact => artifact.userHasFavorited)
+    }
 
     // Apply search text filter
     if (filters.searchText) {
@@ -136,6 +189,16 @@ export default function HomePage() {
 
     setFilteredArtifacts(filtered)
   }
+
+  // Apply initial filter on mount and when artifacts or showFavoritesOnly changes
+  useEffect(() => {
+    handleFiltersChange({ 
+      searchText: '', 
+      subjects: [], 
+      keyStages: [], 
+      sortBy: 'newest' 
+    })
+  }, [artifacts, showFavoritesOnly])
 
   const handleDelete = async (artifactId) => {
     if (!window.confirm(`Are you sure you want to delete this artifact? This cannot be undone.`)) {
@@ -190,7 +253,7 @@ export default function HomePage() {
             onFiltersChange={handleFiltersChange} 
           />
 
-          {filteredArtifacts.length === 0 ? (
+          {artifacts.length === 0 ? (
             <div style={{ 
               textAlign: 'center', 
               padding: '60px 20px',
@@ -201,7 +264,7 @@ export default function HomePage() {
               boxShadow: 'var(--shadow-md)'
             }}>
               <div style={{ fontSize: '64px', marginBottom: '20px', opacity: '0.3' }}>
-                {artifacts.length === 0 ? '📚' : '🔍'}
+                📚
               </div>
               <h2 style={{ 
                 fontSize: 'clamp(24px, 4vw, 32px)', 
@@ -209,7 +272,7 @@ export default function HomePage() {
                 color: 'var(--text-dark)', 
                 fontWeight: '700' 
               }}>
-                {artifacts.length === 0 ? 'No artifacts yet' : 'No matching artifacts'}
+                No artifacts yet
               </h2>
               <p style={{ 
                 color: 'var(--text-gray)', 
@@ -217,31 +280,127 @@ export default function HomePage() {
                 fontSize: 'clamp(16px, 2vw, 18px)', 
                 lineHeight: '1.6' 
               }}>
-                {artifacts.length === 0 
-                  ? 'Be the first to share a Claude-created teaching resource!'
-                  : 'Try adjusting your search or filters to find what you\'re looking for.'
-                }
+                Be the first to share a Claude-created teaching resource!
               </p>
             </div>
           ) : (
             <>
-              <div className="section-header">
-                <h2 className="section-title">
-                  {filteredArtifacts.length === artifacts.length 
-                    ? 'All Artifacts' 
-                    : `${filteredArtifacts.length} ${filteredArtifacts.length === 1 ? 'Artifact' : 'Artifacts'} Found`
-                  }
-                </h2>
-                <p className="section-subtitle">
-                  {filteredArtifacts.length === artifacts.length 
-                    ? `${artifacts.length} ${artifacts.length === 1 ? 'resource' : 'resources'} available`
-                    : `Showing ${filteredArtifacts.length} of ${artifacts.length} total`
-                  }
-                </p>
+              <div className="section-header" style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 'var(--space-4)',
+                marginBottom: 'var(--space-8)'
+              }}>
+                <div>
+                  <h2 className="section-title">
+                    {showFavoritesOnly 
+                      ? 'My Favorites'
+                      : (filteredArtifacts.length === artifacts.length 
+                        ? 'All Artifacts' 
+                        : `${filteredArtifacts.length} ${filteredArtifacts.length === 1 ? 'Artifact' : 'Artifacts'} Found`)
+                    }
+                  </h2>
+                  <p className="section-subtitle">
+                    {showFavoritesOnly
+                      ? `${filteredArtifacts.length} ${filteredArtifacts.length === 1 ? 'favorite' : 'favorites'}`
+                      : (filteredArtifacts.length === artifacts.length 
+                        ? `${artifacts.length} ${artifacts.length === 1 ? 'resource' : 'resources'} available`
+                        : `Showing ${filteredArtifacts.length} of ${artifacts.length} total`)
+                    }
+                  </p>
+                </div>
+
+                {/* Favorites Toggle as Tabs - Always visible */}
+                <div style={{
+                  display: 'flex',
+                  background: 'var(--background-light-gray)',
+                  borderRadius: '8px',
+                  padding: '4px',
+                  gap: '4px'
+                }}>
+                  <button
+                    onClick={() => setShowFavoritesOnly(false)}
+                    style={{
+                      padding: '8px 16px',
+                      background: !showFavoritesOnly ? 'var(--background-white)' : 'transparent',
+                      color: !showFavoritesOnly ? 'var(--text-dark)' : 'var(--text-gray)',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      boxShadow: !showFavoritesOnly ? 'var(--shadow-sm)' : 'none'
+                    }}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setShowFavoritesOnly(true)}
+                    style={{
+                      padding: '8px 16px',
+                      background: showFavoritesOnly ? 'var(--background-white)' : 'transparent',
+                      color: showFavoritesOnly ? 'var(--text-dark)' : 'var(--text-gray)',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      boxShadow: showFavoritesOnly ? 'var(--shadow-sm)' : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span>❤️</span> Favorites
+                  </button>
+                </div>
               </div>
 
-              <div className="grid">
-                {filteredArtifacts.map((artifact) => (
+              {filteredArtifacts.length === 0 ? (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '60px 20px',
+                  background: 'var(--background-white)',
+                  borderRadius: '16px',
+                  maxWidth: '600px',
+                  margin: '0 auto',
+                  boxShadow: 'var(--shadow-md)'
+                }}>
+                  <div style={{ fontSize: '64px', marginBottom: '20px', opacity: '0.3' }}>
+                    {showFavoritesOnly ? '❤️' : '🔍'}
+                  </div>
+                  <h2 style={{ 
+                    fontSize: 'clamp(24px, 4vw, 32px)', 
+                    marginBottom: '16px', 
+                    color: 'var(--text-dark)', 
+                    fontWeight: '700' 
+                  }}>
+                    {showFavoritesOnly ? 'No favorites yet' : 'No matching artifacts'}
+                  </h2>
+                  <p style={{ 
+                    color: 'var(--text-gray)', 
+                    marginBottom: '32px', 
+                    fontSize: 'clamp(16px, 2vw, 18px)', 
+                    lineHeight: '1.6' 
+                  }}>
+                    {showFavoritesOnly 
+                      ? 'Click the heart icon on any artifact to add it to your favorites!'
+                      : 'Try adjusting your search or filters to find what you\'re looking for.'
+                    }
+                  </p>
+                </div>
+              ) : (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))',
+                  gap: 'var(--space-8)',
+                  width: '100%'
+                }}>
+                  {filteredArtifacts.map((artifact) => (
                   <div key={artifact.id} className="card">
                     <div style={{ 
                       display: 'flex', 
@@ -393,6 +552,39 @@ export default function HomePage() {
                           ⬆️ {artifact.voteCount}
                         </button>
 
+                        <button
+                          onClick={() => handleFavorite(artifact.id, artifact.userHasFavorited)}
+                          title={artifact.userHasFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 16px',
+                            background: artifact.userHasFavorited ? '#FFE5E5' : 'var(--background-white)',
+                            color: artifact.userHasFavorited ? '#E63946' : 'var(--text-gray)',
+                            border: `2px solid ${artifact.userHasFavorited ? '#E63946' : 'var(--border-color)'}`,
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!artifact.userHasFavorited) {
+                              e.currentTarget.style.borderColor = '#E63946'
+                              e.currentTarget.style.color = '#E63946'
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!artifact.userHasFavorited) {
+                              e.currentTarget.style.borderColor = 'var(--border-color)'
+                              e.currentTarget.style.color = 'var(--text-gray)'
+                            }
+                          }}
+                        >
+                          {artifact.userHasFavorited ? '❤️' : '♡'} {artifact.favoriteCount}
+                        </button>
+
                         <a 
                           href={artifact.artifact_url}
                           target="_blank"
@@ -475,7 +667,8 @@ export default function HomePage() {
                     </div>
                   </div>
                 ))}
-              </div>
+                </div>
+              )}
             </>
           )}
         </div>
