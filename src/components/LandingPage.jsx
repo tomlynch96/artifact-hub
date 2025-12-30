@@ -1,15 +1,20 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
-import { useAuth } from '../AuthContext'
 
 export default function LandingPage({ onSignUpClick }) {
-  const { user } = useAuth()
   const [topArtifacts, setTopArtifacts] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [hoveredCard, setHoveredCard] = useState(null)
+  const [stats, setStats] = useState({
+    artifactCount: 0,
+    contributorCount: 0,
+    voteCount: 0
+  })
 
   useEffect(() => {
     fetchTopArtifacts()
+    fetchStats()
   }, [])
 
   // Auto-rotate gallery every 5 seconds
@@ -17,11 +22,43 @@ export default function LandingPage({ onSignUpClick }) {
     if (topArtifacts.length === 0) return
     
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % topArtifacts.length)
+      setCurrentIndex((prev) => {
+        const next = prev + 3
+        return next >= topArtifacts.length ? 0 : next
+      })
     }, 5000)
 
     return () => clearInterval(interval)
   }, [topArtifacts.length])
+
+  const fetchStats = async () => {
+    try {
+      // Get artifact count
+      const { count: artifactCount } = await supabase
+        .from('artifacts')
+        .select('*', { count: 'exact', head: true })
+
+      // Get unique contributor count
+      const { data: artifacts } = await supabase
+        .from('artifacts')
+        .select('user_id')
+      
+      const uniqueContributors = new Set(artifacts?.map(a => a.user_id) || []).size
+
+      // Get total vote count
+      const { count: voteCount } = await supabase
+        .from('votes')
+        .select('*', { count: 'exact', head: true })
+
+      setStats({
+        artifactCount: artifactCount || 0,
+        contributorCount: uniqueContributors || 0,
+        voteCount: voteCount || 0
+      })
+    } catch (error) {
+      console.error('Error fetching stats:', error)
+    }
+  }
 
   const fetchTopArtifacts = async () => {
     try {
@@ -33,11 +70,10 @@ export default function LandingPage({ onSignUpClick }) {
           artifact_key_stages (key_stage)
         `)
         .order('created_at', { ascending: false })
-        .limit(20)
+        .limit(30)
 
       if (error) throw error
 
-      // Get vote counts for each artifact
       const artifactsWithVotes = await Promise.all(
         artifactsData.map(async (artifact) => {
           const { count } = await supabase
@@ -52,10 +88,10 @@ export default function LandingPage({ onSignUpClick }) {
         })
       )
 
-      // Sort by votes and take top 6
+      // Sort by votes and take top 9 (3 sets of 3)
       const topRated = artifactsWithVotes
         .sort((a, b) => b.voteCount - a.voteCount)
-        .slice(0, 6)
+        .slice(0, 9)
 
       setTopArtifacts(topRated)
       setLoading(false)
@@ -70,9 +106,21 @@ export default function LandingPage({ onSignUpClick }) {
     onSignUpClick()
   }
 
-  const goToSlide = (index) => {
-    setCurrentIndex(index)
+  const goToNext = () => {
+    setCurrentIndex((prev) => {
+      const next = prev + 3
+      return next >= topArtifacts.length ? 0 : next
+    })
   }
+
+  const goToPrev = () => {
+    setCurrentIndex((prev) => {
+      const next = prev - 3
+      return next < 0 ? Math.max(0, Math.floor((topArtifacts.length - 1) / 3) * 3) : next
+    })
+  }
+
+  const visibleArtifacts = topArtifacts.slice(currentIndex, currentIndex + 3)
 
   if (loading) {
     return (
@@ -91,12 +139,10 @@ export default function LandingPage({ onSignUpClick }) {
     <div>
       {/* Hero Section */}
       <div className="hero">
-        {/* Translucent shapes */}
         <div className="shape-1"></div>
         <div className="shape-2"></div>
         <div className="shape-3"></div>
         
-        {/* Content */}
         <h1>Teacher Artifact Library</h1>
         <div className="hero-subtitle">
           <p>Discover and share Claude-created teaching resources for UK secondary education</p>
@@ -108,7 +154,7 @@ export default function LandingPage({ onSignUpClick }) {
       {/* Main Content */}
       <div className="page-section">
         <div className="container">
-          {/* Stats Section */}
+          {/* Real Stats */}
           <div style={{
             display: 'flex',
             gap: 'clamp(24px, 5vw, 48px)',
@@ -127,10 +173,10 @@ export default function LandingPage({ onSignUpClick }) {
                 color: 'var(--primary-terracotta)',
                 marginBottom: 'var(--space-2)'
               }}>
-                150+
+                {stats.artifactCount}
               </div>
               <div style={{ fontSize: 'var(--text-base)', color: 'var(--text-gray)', fontWeight: '600' }}>
-                Artifacts
+                {stats.artifactCount === 1 ? 'Artifact' : 'Artifacts'}
               </div>
             </div>
             <div style={{ textAlign: 'center', minWidth: '100px' }}>
@@ -140,10 +186,10 @@ export default function LandingPage({ onSignUpClick }) {
                 color: 'var(--primary-terracotta)',
                 marginBottom: 'var(--space-2)'
               }}>
-                50+
+                {stats.contributorCount}
               </div>
               <div style={{ fontSize: 'var(--text-base)', color: 'var(--text-gray)', fontWeight: '600' }}>
-                Contributors
+                {stats.contributorCount === 1 ? 'Contributor' : 'Contributors'}
               </div>
             </div>
             <div style={{ textAlign: 'center', minWidth: '100px' }}>
@@ -153,15 +199,15 @@ export default function LandingPage({ onSignUpClick }) {
                 color: 'var(--primary-terracotta)',
                 marginBottom: 'var(--space-2)'
               }}>
-                500+
+                {stats.voteCount}
               </div>
               <div style={{ fontSize: 'var(--text-base)', color: 'var(--text-gray)', fontWeight: '600' }}>
-                Upvotes
+                {stats.voteCount === 1 ? 'Upvote' : 'Upvotes'}
               </div>
             </div>
           </div>
 
-          {/* Top Rated Artifacts Gallery */}
+          {/* 3-Card Gallery */}
           <div style={{ marginBottom: 'var(--space-16)' }}>
             <div className="section-header" style={{ textAlign: 'center', marginBottom: 'var(--space-10)' }}>
               <h2 className="section-title">Top Rated Artifacts</h2>
@@ -171,190 +217,185 @@ export default function LandingPage({ onSignUpClick }) {
             </div>
 
             {topArtifacts.length > 0 ? (
-              <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-                {/* Main Gallery Display */}
+              <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative' }}>
+                {/* Navigation Arrows */}
+                <button
+                  onClick={goToPrev}
+                  style={{
+                    position: 'absolute',
+                    left: '-60px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'white',
+                    border: '2px solid var(--border-color)',
+                    borderRadius: '50%',
+                    width: '48px',
+                    height: '48px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    boxShadow: 'var(--shadow-md)',
+                    transition: 'all 0.2s',
+                    zIndex: 10
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--primary-terracotta)'
+                    e.currentTarget.style.color = 'white'
+                    e.currentTarget.style.borderColor = 'var(--primary-terracotta)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'white'
+                    e.currentTarget.style.color = 'black'
+                    e.currentTarget.style.borderColor = 'var(--border-color)'
+                  }}
+                >
+                  ←
+                </button>
+                <button
+                  onClick={goToNext}
+                  style={{
+                    position: 'absolute',
+                    right: '-60px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'white',
+                    border: '2px solid var(--border-color)',
+                    borderRadius: '50%',
+                    width: '48px',
+                    height: '48px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    boxShadow: 'var(--shadow-md)',
+                    transition: 'all 0.2s',
+                    zIndex: 10
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--primary-terracotta)'
+                    e.currentTarget.style.color = 'white'
+                    e.currentTarget.style.borderColor = 'var(--primary-terracotta)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'white'
+                    e.currentTarget.style.color = 'black'
+                    e.currentTarget.style.borderColor = 'var(--border-color)'
+                  }}
+                >
+                  →
+                </button>
+
+                {/* 3 Cards Grid */}
                 <div style={{
-                  position: 'relative',
-                  borderRadius: 'var(--radius-xl)',
-                  overflow: 'hidden',
-                  marginBottom: 'var(--space-6)',
-                  boxShadow: 'var(--shadow-xl)',
-                  background: 'var(--background-white)'
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                  gap: 'var(--space-6)',
+                  marginBottom: 'var(--space-6)'
                 }}>
-                  {/* Screenshot */}
-                  <div style={{ position: 'relative', aspectRatio: '16/10' }}>
-                    <img 
-                      src={topArtifacts[currentIndex].screenshot_url}
-                      alt={topArtifacts[currentIndex].title}
-                      style={{ 
-                        width: '100%', 
-                        height: '100%', 
-                        objectFit: 'cover' 
-                      }}
-                    />
-                    
-                    {/* Overlay gradient */}
-                    <div style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: '50%',
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)'
-                    }} />
-
-                    {/* Vote badge */}
-                    <div style={{
-                      position: 'absolute',
-                      top: 'var(--space-4)',
-                      right: 'var(--space-4)',
-                      background: 'rgba(0, 0, 0, 0.7)',
-                      backdropFilter: 'blur(10px)',
-                      color: 'white',
-                      padding: '8px 16px',
-                      borderRadius: '20px',
-                      fontSize: 'var(--text-sm)',
-                      fontWeight: '700',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 'var(--space-2)'
-                    }}>
-                      ⬆️ {topArtifacts[currentIndex].voteCount}
-                    </div>
-
-                    {/* Navigation arrows */}
-                    <button
-                      onClick={() => goToSlide((currentIndex - 1 + topArtifacts.length) % topArtifacts.length)}
+                  {visibleArtifacts.map((artifact) => (
+                    <a
+                      key={artifact.id}
+                      href={artifact.artifact_url}
+                      onClick={handleArtifactClick}
+                      onMouseEnter={() => setHoveredCard(artifact.id)}
+                      onMouseLeave={() => setHoveredCard(null)}
                       style={{
-                        position: 'absolute',
-                        left: 'var(--space-4)',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'rgba(255, 255, 255, 0.9)',
-                        border: 'none',
-                        borderRadius: '50%',
-                        width: '48px',
-                        height: '48px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        fontSize: '24px',
-                        boxShadow: 'var(--shadow-lg)',
-                        transition: 'all 0.2s'
+                        textDecoration: 'none',
+                        display: 'block',
+                        cursor: 'pointer'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = 'white'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)'}
                     >
-                      ←
-                    </button>
-                    <button
-                      onClick={() => goToSlide((currentIndex + 1) % topArtifacts.length)}
-                      style={{
-                        position: 'absolute',
-                        right: 'var(--space-4)',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'rgba(255, 255, 255, 0.9)',
-                        border: 'none',
-                        borderRadius: '50%',
-                        width: '48px',
-                        height: '48px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        fontSize: '24px',
-                        boxShadow: 'var(--shadow-lg)',
-                        transition: 'all 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = 'white'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)'}
-                    >
-                      →
-                    </button>
-
-                    {/* Content overlay */}
-                    <div style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      padding: 'var(--space-6)',
-                      color: 'white'
-                    }}>
-                      <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-3)', flexWrap: 'wrap' }}>
-                        {topArtifacts[currentIndex].artifact_key_stages?.map((k, i) => (
-                          <span key={i} className="tag key-stage" style={{
-                            background: 'rgba(255, 255, 255, 0.25)',
-                            color: 'white',
-                            border: '1px solid rgba(255, 255, 255, 0.3)'
-                          }}>
-                            {k.key_stage}
-                          </span>
-                        ))}
-                        {topArtifacts[currentIndex].artifact_subjects?.slice(0, 2).map((s, i) => (
-                          <span key={i} className="tag" style={{
-                            background: 'var(--primary-terracotta)',
-                            color: 'white'
-                          }}>
-                            {s.subject}
-                          </span>
-                        ))}
-                      </div>
-
-                      <h3 style={{ 
-                        fontSize: 'clamp(24px, 4vw, 32px)', 
-                        fontWeight: '700',
-                        marginBottom: 'var(--space-2)',
-                        lineHeight: '1.2'
-                      }}>
-                        {topArtifacts[currentIndex].title}
-                      </h3>
-
-                      {topArtifacts[currentIndex].description && (
-                        <p style={{ 
-                          fontSize: 'clamp(14px, 2vw, 16px)',
-                          opacity: 0.95,
-                          marginBottom: 'var(--space-4)',
-                          lineHeight: '1.5'
-                        }}>
-                          {topArtifacts[currentIndex].description}
-                        </p>
-                      )}
-
-                      <a
-                        href={topArtifacts[currentIndex].artifact_url}
-                        onClick={handleArtifactClick}
-                        className="btn-primary"
+                      <div
                         style={{
-                          display: 'inline-block',
-                          textDecoration: 'none'
+                          position: 'relative',
+                          borderRadius: 'var(--radius-xl)',
+                          overflow: 'hidden',
+                          aspectRatio: '4/3',
+                          boxShadow: 'var(--shadow-md)',
+                          transition: 'all 0.3s'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-4px)'
+                          e.currentTarget.style.boxShadow = 'var(--shadow-xl)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)'
+                          e.currentTarget.style.boxShadow = 'var(--shadow-md)'
                         }}
                       >
-                        View Artifact →
-                      </a>
-                    </div>
-                  </div>
+                        {/* Screenshot */}
+                        <img 
+                          src={artifact.screenshot_url}
+                          alt={artifact.title}
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            objectFit: 'cover'
+                          }}
+                        />
+
+                        {/* Vote badge */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          background: 'rgba(0, 0, 0, 0.7)',
+                          color: 'white',
+                          padding: '6px 12px',
+                          borderRadius: '20px',
+                          fontSize: '13px',
+                          fontWeight: '700'
+                        }}>
+                          ⬆️ {artifact.voteCount}
+                        </div>
+
+                        {/* Hover overlay with title */}
+                        <div
+                          style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            background: 'rgba(192, 101, 67, 0.95)',
+                            padding: 'var(--space-5)',
+                            transform: hoveredCard === artifact.id ? 'translateY(0)' : 'translateY(100%)',
+                            transition: 'transform 0.3s ease',
+                            color: 'white'
+                          }}
+                        >
+                          <h3 style={{ 
+                            fontSize: 'var(--text-lg)', 
+                            fontWeight: '700',
+                            lineHeight: '1.3',
+                            margin: 0
+                          }}>
+                            {artifact.title}
+                          </h3>
+                        </div>
+                      </div>
+                    </a>
+                  ))}
                 </div>
 
-                {/* Thumbnail navigation */}
+                {/* Dot indicators */}
                 <div style={{
                   display: 'flex',
-                  gap: 'var(--space-3)',
-                  justifyContent: 'center',
-                  flexWrap: 'wrap'
+                  gap: 'var(--space-2)',
+                  justifyContent: 'center'
                 }}>
-                  {topArtifacts.map((artifact, index) => (
+                  {Array.from({ length: Math.ceil(topArtifacts.length / 3) }).map((_, index) => (
                     <button
-                      key={artifact.id}
-                      onClick={() => goToSlide(index)}
+                      key={index}
+                      onClick={() => setCurrentIndex(index * 3)}
                       style={{
-                        width: index === currentIndex ? '48px' : '12px',
+                        width: currentIndex === index * 3 ? '32px' : '12px',
                         height: '12px',
                         border: 'none',
                         borderRadius: '6px',
-                        background: index === currentIndex ? 'var(--primary-terracotta)' : 'var(--border-color)',
+                        background: currentIndex === index * 3 ? 'var(--primary-terracotta)' : 'var(--border-color)',
                         cursor: 'pointer',
                         transition: 'all 0.3s',
                         padding: 0
@@ -370,20 +411,18 @@ export default function LandingPage({ onSignUpClick }) {
             )}
           </div>
 
-          {/* CTA Section */}
+          {/* CTA Section - No Box */}
           <div style={{
             textAlign: 'center',
             padding: 'clamp(48px, 8vw, 80px) var(--space-6)',
-            background: 'linear-gradient(135deg, var(--primary-terracotta-light) 0%, var(--primary-terracotta) 100%)',
-            borderRadius: 'var(--radius-2xl)',
-            color: 'white',
             marginBottom: 'var(--space-12)'
           }}>
             <h2 style={{ 
               fontSize: 'clamp(28px, 5vw, 40px)', 
               fontWeight: '800',
               marginBottom: 'var(--space-4)',
-              lineHeight: '1.2'
+              lineHeight: '1.2',
+              color: 'var(--primary-terracotta)'
             }}>
               Ready to explore more?
             </h2>
@@ -392,16 +431,16 @@ export default function LandingPage({ onSignUpClick }) {
               marginBottom: 'var(--space-6)',
               maxWidth: '600px',
               margin: '0 auto var(--space-6)',
-              opacity: 0.95,
-              lineHeight: '1.6'
+              lineHeight: '1.6',
+              color: 'var(--text-dark)'
             }}>
               Join our community of educators and access hundreds of AI-powered teaching resources
             </p>
             <button 
               onClick={onSignUpClick}
               style={{
-                background: 'white',
-                color: 'var(--primary-terracotta)',
+                background: 'var(--primary-terracotta)',
+                color: 'white',
                 border: 'none',
                 padding: '16px 40px',
                 borderRadius: 'var(--radius-lg)',
@@ -414,10 +453,12 @@ export default function LandingPage({ onSignUpClick }) {
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)'
                 e.currentTarget.style.boxShadow = 'var(--shadow-xl)'
+                e.currentTarget.style.background = 'var(--primary-terracotta-dark)'
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)'
                 e.currentTarget.style.boxShadow = 'var(--shadow-lg)'
+                e.currentTarget.style.background = 'var(--primary-terracotta)'
               }}
             >
               Get Started Free
