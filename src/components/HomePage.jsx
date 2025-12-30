@@ -1,3 +1,7 @@
+// Add this comment at the top of your HomePage.jsx to indicate the hero has been removed
+
+// UPDATED: Hero section removed for authenticated users - only shows on landing page
+
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../AuthContext'
@@ -50,98 +54,91 @@ export default function HomePage() {
             ...artifact,
             voteCount: count || 0,
             userHasVoted,
-            isOwner: user && artifact.user_id === user.id
+            isOwner: artifact.user_id === user?.id
           }
         })
       )
 
       setArtifacts(artifactsWithVotes)
       setFilteredArtifacts(artifactsWithVotes)
+      setLoading(false)
     } catch (error) {
       console.error('Error fetching artifacts:', error)
-    } finally {
       setLoading(false)
+    }
+  }
+
+  const handleVote = async (artifactId, currentlyVoted) => {
+    if (!user) return
+
+    try {
+      if (currentlyVoted) {
+        await supabase
+          .from('votes')
+          .delete()
+          .eq('artifact_id', artifactId)
+          .eq('user_id', user.id)
+      } else {
+        await supabase
+          .from('votes')
+          .insert({
+            artifact_id: artifactId,
+            user_id: user.id
+          })
+      }
+      
+      fetchArtifacts()
+    } catch (error) {
+      console.error('Error voting:', error)
+      alert('Error updating vote. Please try again.')
     }
   }
 
   const handleFiltersChange = (filters) => {
     let filtered = [...artifacts]
 
+    // Apply search text filter
     if (filters.searchText) {
       const searchLower = filters.searchText.toLowerCase()
-      filtered = filtered.filter(artifact => 
+      filtered = filtered.filter(artifact =>
         artifact.title.toLowerCase().includes(searchLower) ||
         artifact.description?.toLowerCase().includes(searchLower) ||
         artifact.first_prompt?.toLowerCase().includes(searchLower)
       )
     }
 
-    if (filters.subjects.length > 0) {
-      filtered = filtered.filter(artifact => {
-        const artifactSubjects = artifact.artifact_subjects?.map(s => s.subject) || []
-        return filters.subjects.some(subject => artifactSubjects.includes(subject))
-      })
+    // Apply subject filter
+    if (filters.subjects && filters.subjects.length > 0) {
+      filtered = filtered.filter(artifact =>
+        artifact.artifact_subjects?.some(s =>
+          filters.subjects.includes(s.subject)
+        )
+      )
     }
 
-    if (filters.keyStages.length > 0) {
-      filtered = filtered.filter(artifact => {
-        const artifactKeyStages = artifact.artifact_key_stages?.map(k => k.key_stage) || []
-        return filters.keyStages.some(keyStage => artifactKeyStages.includes(keyStage))
-      })
+    // Apply key stage filter
+    if (filters.keyStages && filters.keyStages.length > 0) {
+      filtered = filtered.filter(artifact =>
+        artifact.artifact_key_stages?.some(k =>
+          filters.keyStages.includes(k.key_stage)
+        )
+      )
     }
 
-    switch (filters.sortBy) {
-      case 'most_voted':
-        filtered.sort((a, b) => b.voteCount - a.voteCount)
-        break
-      case 'alphabetical':
-        filtered.sort((a, b) => a.title.localeCompare(b.title))
-        break
-      case 'newest':
-      default:
-        filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    // Apply sorting
+    if (filters.sortBy === 'most_voted') {
+      filtered.sort((a, b) => b.voteCount - a.voteCount)
+    } else if (filters.sortBy === 'alphabetical') {
+      filtered.sort((a, b) => a.title.localeCompare(b.title))
+    } else {
+      // 'newest' - already sorted by created_at from database
     }
 
     setFilteredArtifacts(filtered)
   }
 
-  const handleVote = async (artifactId) => {
-    if (!user) {
-      alert('Please log in to vote')
-      return
-    }
-
-    try {
-      const artifact = artifacts.find(a => a.id === artifactId)
-      
-      if (artifact.userHasVoted) {
-        const { error: deleteError } = await supabase
-          .from('votes')
-          .delete()
-          .eq('artifact_id', artifactId)
-          .eq('user_id', user.id)
-
-        if (deleteError) throw deleteError
-      } else {
-        const { error: insertError } = await supabase
-          .from('votes')
-          .insert({ 
-            artifact_id: artifactId,
-            user_id: user.id
-          })
-  
-        if (insertError) throw insertError
-      }
-      
-      fetchArtifacts()
-    } catch (error) {
-      console.error('Full error:', error)
-      alert(`Error updating vote: ${error.message}`)
-    }
-  }
-
-  const handleDelete = async (artifactId, artifactTitle) => {
-    if (!window.confirm(`Are you sure you want to delete "${artifactTitle}"? This cannot be undone.`)) {
+  const handleDelete = async (artifactId) => {
+    if (!window.confirm(`Are you sure you want to delete this artifact? This cannot be undone.`)) {
       return
     }
 
@@ -185,24 +182,13 @@ export default function HomePage() {
 
   return (
     <div>
-      <div className="hero">
-        {/* Translucent shapes */}
-        <div className="shape-1"></div>
-        <div className="shape-2"></div>
-        <div className="shape-3"></div>
-        
-        {/* Content */}
-        <h1>Teacher Artifact Library</h1>
-        <div className="hero-subtitle">
-          <p>Discover and share Claude-created teaching resources for UK secondary education</p>
-          <p>Save hours on lesson planning with AI-powered educational content</p>
-          <p>Join a community of innovative educators using Claude AI</p>
-        </div>
-      </div>
-
-      <div className="page-section">
+      {/* HERO SECTION REMOVED - Now only on landing page for non-authenticated users */}
+      
+      <div className="page-section" style={{ paddingTop: 'var(--space-12)' }}>
         <div className="container">
-          <SearchFilterBar onFiltersChange={handleFiltersChange} />
+          <SearchFilterBar 
+            onFiltersChange={handleFiltersChange} 
+          />
 
           {filteredArtifacts.length === 0 ? (
             <div style={{ 
@@ -302,159 +288,189 @@ export default function HomePage() {
                       </h3>
                       
                       {artifact.description && (
-                        <p style={{ 
-                          fontSize: '14px', 
-                          color: 'var(--text-gray)', 
-                          marginBottom: '16px',
-                          lineHeight: '1.6',
-                          flexGrow: 1
-                        }}>
-                          {artifact.description.length > 120 
-                            ? artifact.description.substring(0, 120) + '...' 
-                            : artifact.description}
-                        </p>
-                      )}
-                      
-                      <div style={{ marginBottom: '16px', minHeight: '30px' }}>
-                        {artifact.artifact_key_stages?.map((k, i) => (
-                          <span key={i} className="tag key-stage">
-                            {k.key_stage}
-                          </span>
-                        ))}
-                        {artifact.artifact_subjects?.slice(0, 2).map((s, i) => (
-                          <span key={i} className="tag">
-                            {s.subject}
-                          </span>
-                        ))}
-                        {artifact.artifact_subjects?.length > 2 && (
-                          <span className="tag" style={{ background: 'var(--text-light-gray)' }}>
-                            +{artifact.artifact_subjects.length - 2}
-                          </span>
-                        )}
-                      </div>
-
-                      {artifact.isOwner && (
-                        <div style={{
-                          display: 'flex',
-                          gap: '8px',
-                          marginBottom: '12px',
-                          paddingBottom: '12px',
-                          borderBottom: '1px solid var(--border-color)'
-                        }}>
-                          <button
-                            onClick={() => setEditingArtifact(artifact)}
-                            style={{
-                              flex: 1,
-                              padding: '8px 12px',
-                              background: 'var(--selected-bg)',
-                              border: '2px solid var(--border-terracotta)',
-                              borderRadius: '8px',
-                              fontSize: '13px',
-                              fontWeight: '600',
-                              cursor: 'pointer',
-                              color: 'var(--primary-terracotta)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '4px'
-                            }}
-                          >
-                            ✏️ Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(artifact.id, artifact.title)}
-                            style={{
-                              flex: 1,
-                              padding: '8px 12px',
-                              background: 'var(--btn-delete-bg)',
-                              border: '2px solid var(--btn-delete-border)',
-                              borderRadius: '8px',
-                              fontSize: '13px',
-                              fontWeight: '600',
-                              cursor: 'pointer',
-                              color: 'var(--btn-delete-text)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '4px'
-                            }}
-                          >
-                            🗑️ Delete
-                          </button>
+                        <div style={{ marginBottom: '16px' }}>
+                          <p style={{ 
+                            fontSize: '14px', 
+                            color: 'var(--text-gray)', 
+                            lineHeight: '1.6',
+                            flexGrow: 1,
+                            marginBottom: artifact.description.length > 120 ? '8px' : '0'
+                          }}>
+                            {artifact.description.length > 120 
+                              ? (
+                                <>
+                                  <span id={`desc-${artifact.id}`}>
+                                    {artifact.description.substring(0, 120)}...
+                                  </span>
+                                  <span 
+                                    id={`desc-full-${artifact.id}`}
+                                    style={{ display: 'none' }}
+                                  >
+                                    {artifact.description}
+                                  </span>
+                                </>
+                              )
+                              : artifact.description
+                            }
+                          </p>
+                          {artifact.description.length > 120 && (
+                            <button
+                              onClick={(e) => {
+                                const shortDesc = document.getElementById(`desc-${artifact.id}`)
+                                const fullDesc = document.getElementById(`desc-full-${artifact.id}`)
+                                const button = e.currentTarget
+                                
+                                if (shortDesc.style.display === 'none') {
+                                  // Show short version
+                                  shortDesc.style.display = 'inline'
+                                  fullDesc.style.display = 'none'
+                                  button.textContent = 'Read more'
+                                } else {
+                                  // Show full version
+                                  shortDesc.style.display = 'none'
+                                  fullDesc.style.display = 'inline'
+                                  button.textContent = 'Show less'
+                                }
+                              }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--primary-terracotta)',
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                padding: '0',
+                                textDecoration: 'underline'
+                              }}
+                            >
+                              Read more
+                            </button>
+                          )}
                         </div>
                       )}
 
                       <div style={{ 
                         display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        paddingTop: '16px',
-                        borderTop: '1px solid var(--border-color)',
-                        marginTop: 'auto',
-                        gap: '12px',
-                        flexWrap: 'wrap'
+                        gap: '8px', 
+                        flexWrap: 'wrap',
+                        marginBottom: '16px'
                       }}>
-                        <a 
-                          href={artifact.artifact_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          style={{ 
-                            fontSize: '14px',
-                            fontWeight: '600',
+                        {artifact.artifact_key_stages?.map((k, i) => (
+                          <span key={i} className="tag key-stage">
+                            {k.key_stage}
+                          </span>
+                        ))}
+                        {artifact.artifact_subjects?.map((s, i) => (
+                          <span key={i} className="tag">
+                            {s.subject}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div style={{ 
+                        display: 'flex', 
+                        gap: '12px',
+                        alignItems: 'center',
+                        marginTop: 'auto'
+                      }}>
+                        <button
+                          onClick={() => handleVote(artifact.id, artifact.userHasVoted)}
+                          style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '4px'
-                          }}
-                        >
-                          View Artifact →
-                        </a>
-                        <button 
-                          onClick={() => handleVote(artifact.id)}
-                          style={{ 
+                            gap: '6px',
+                            padding: '8px 16px',
                             background: artifact.userHasVoted ? 'var(--vote-active-bg)' : 'var(--vote-default-bg)',
-                            border: artifact.userHasVoted ? '2px solid var(--vote-active-border)' : '2px solid var(--vote-default-border)',
-                            padding: '6px 12px',
+                            color: artifact.userHasVoted ? 'var(--vote-active-text)' : 'var(--vote-default-text)',
+                            border: `2px solid ${artifact.userHasVoted ? 'var(--vote-active-border)' : 'var(--vote-default-border)'}`,
                             borderRadius: '8px',
                             cursor: 'pointer',
                             fontSize: '14px',
                             fontWeight: '600',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            transition: 'all 0.2s',
-                            color: artifact.userHasVoted ? 'var(--vote-active-text)' : 'var(--vote-default-text)'
+                            transition: 'all 0.2s'
                           }}
                         >
-                          ⬆️ {artifact.voteCount || 0}
+                          ⬆️ {artifact.voteCount}
                         </button>
+
+                        <a 
+                          href={artifact.artifact_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-primary"
+                          style={{
+                            textDecoration: 'none',
+                            padding: '8px 16px',
+                            fontSize: '14px',
+                            flexGrow: 1,
+                            textAlign: 'center'
+                          }}
+                        >
+                          View Artifact
+                        </a>
                       </div>
 
                       {artifact.first_prompt && (
                         <details style={{ marginTop: '16px' }}>
                           <summary style={{ 
                             cursor: 'pointer',
-                            color: 'var(--primary-terracotta)',
+                            fontSize: '14px',
                             fontWeight: '600',
-                            fontSize: '13px',
-                            padding: '12px 0',
-                            borderTop: '1px solid var(--border-color)'
+                            color: 'var(--primary-terracotta)',
+                            padding: '8px 0'
                           }}>
-                            💡 Original Prompt
+                            Original Prompt
                           </summary>
                           <p style={{ 
+                            fontSize: '13px',
+                            color: 'var(--text-gray)',
                             marginTop: '8px',
                             padding: '12px',
                             background: 'var(--background-light-gray)',
-                            borderRadius: '6px',
-                            fontSize: '13px',
-                            color: 'var(--text-gray)',
-                            fontStyle: 'italic',
-                            lineHeight: '1.6',
-                            borderLeft: '3px solid var(--border-terracotta)'
+                            borderRadius: '8px',
+                            lineHeight: '1.6'
                           }}>
-                            "{artifact.first_prompt}"
+                            {artifact.first_prompt}
                           </p>
                         </details>
+                      )}
+
+                      {artifact.isOwner && (
+                        <div style={{ 
+                          marginTop: '16px',
+                          paddingTop: '16px',
+                          borderTop: '1px solid var(--border-color)',
+                          display: 'flex',
+                          gap: '8px'
+                        }}>
+                          <button
+                            onClick={() => setEditingArtifact(artifact)}
+                            className="btn-secondary"
+                            style={{
+                              fontSize: '13px',
+                              padding: '6px 12px',
+                              flex: 1
+                            }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(artifact.id)}
+                            style={{
+                              fontSize: '13px',
+                              padding: '6px 12px',
+                              background: 'var(--btn-delete-bg)',
+                              color: 'var(--btn-delete-text)',
+                              border: `2px solid var(--btn-delete-border)`,
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              fontWeight: '600',
+                              flex: 1
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>

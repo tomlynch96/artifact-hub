@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { AuthProvider, useAuth } from './AuthContext'
 import Auth from './components/Auth'
 import HomePage from './components/HomePage'
+import LandingPage from './components/LandingPage'
 import SubmitArtifact from './components/SubmitArtifact'
 import './App.css'
 
 function AppContent() {
   const { user, loading, signOut } = useAuth()
   const [currentPage, setCurrentPage] = useState('home')
+  const [showAuth, setShowAuth] = useState(false)
 
   if (loading) {
     return (
@@ -24,10 +26,40 @@ function AppContent() {
     )
   }
 
-  if (!user) {
+  // Show auth modal if user clicked sign up from landing page
+  if (!user && showAuth) {
     return <Auth />
   }
 
+  // Show landing page if not authenticated
+  if (!user) {
+    return (
+      <div style={{ minHeight: '100vh' }}>
+        {/* Simple nav for landing page */}
+        <nav>
+          <div className="nav-content">
+            <div className="nav-left">
+              <h2>Artifact Library</h2>
+            </div>
+            <div className="nav-right">
+              <button 
+                onClick={() => setShowAuth(true)}
+                className="primary"
+              >
+                Sign In / Sign Up
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        <main>
+          <LandingPage onSignUpClick={() => setShowAuth(true)} />
+        </main>
+      </div>
+    )
+  }
+
+  // Authenticated user view
   return (
     <div style={{ minHeight: '100vh' }}>
       <nav>
