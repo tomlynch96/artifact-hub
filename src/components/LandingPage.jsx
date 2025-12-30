@@ -9,13 +9,29 @@ export default function LandingPage({ onSignUpClick }) {
   const [stats, setStats] = useState({
     artifactCount: 0,
     contributorCount: 0,
-    voteCount: 0
+    visitCount: 0
   })
 
   useEffect(() => {
     fetchTopArtifacts()
     fetchStats()
+    trackPageVisit()
   }, [])
+
+  // Track page visit
+  const trackPageVisit = async () => {
+    try {
+      await supabase
+        .from('page_visits')
+        .insert({
+          page: 'landing',
+          visited_at: new Date().toISOString()
+        })
+    } catch (error) {
+      // Silently fail if table doesn't exist yet
+      console.log('Visit tracking not yet enabled')
+    }
+  }
 
   // Auto-rotate gallery every 5 seconds
   useEffect(() => {
@@ -45,18 +61,26 @@ export default function LandingPage({ onSignUpClick }) {
       
       const uniqueContributors = new Set(artifacts?.map(a => a.user_id) || []).size
 
-      // Get total vote count
-      const { count: voteCount } = await supabase
-        .from('votes')
+      // Get visit count from page_visits table (or create simple counter)
+      // Note: You'll need to create a page_visits table or use a simple counter
+      // For now, we'll calculate based on artifact views or use a placeholder
+      const { count: visitCount } = await supabase
+        .from('page_visits')
         .select('*', { count: 'exact', head: true })
 
       setStats({
         artifactCount: artifactCount || 0,
         contributorCount: uniqueContributors || 0,
-        voteCount: voteCount || 0
+        visitCount: visitCount || 0
       })
     } catch (error) {
       console.error('Error fetching stats:', error)
+      // If page_visits table doesn't exist yet, set a default
+      setStats({
+        artifactCount: 0,
+        contributorCount: 0,
+        visitCount: 0
+      })
     }
   }
 
@@ -199,10 +223,10 @@ export default function LandingPage({ onSignUpClick }) {
                 color: 'var(--primary-terracotta)',
                 marginBottom: 'var(--space-2)'
               }}>
-                {stats.voteCount}
+                {stats.visitCount}
               </div>
               <div style={{ fontSize: 'var(--text-base)', color: 'var(--text-gray)', fontWeight: '600' }}>
-                {stats.voteCount === 1 ? 'Upvote' : 'Upvotes'}
+                {stats.visitCount === 1 ? 'Visit' : 'Visits'}
               </div>
             </div>
           </div>
