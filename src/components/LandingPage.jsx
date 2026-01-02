@@ -170,7 +170,7 @@ export default function LandingPage({ onSignUpClick }) {
         <h1>Teacher Vibes</h1>
         <div className="hero-subtitle">
           <p>Discover and share Claude-created teaching resources for UK secondary education</p>
-          <p>Save hours on lesson planning with AI-powered educational content</p>
+          <p>Find interactive resources for when still images and Powerpoints just won't do!</p>
           <p>Join a community of innovative educators using Claude AI</p>
         </div>
       </div>
