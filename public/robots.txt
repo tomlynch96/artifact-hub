@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://teachervibes.co.uk/sitemap.xml
