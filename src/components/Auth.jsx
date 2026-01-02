@@ -47,7 +47,7 @@ export default function Auth() {
             marginBottom: '8px', 
             color: 'var(--primary-terracotta)' 
           }}>
-            Teacher Artifact Library
+            Teacher Vibes
           </h1>
           <p style={{ 
             color: 'var(--text-gray)', 

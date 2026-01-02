@@ -167,7 +167,7 @@ export default function LandingPage({ onSignUpClick }) {
         <div className="shape-2"></div>
         <div className="shape-3"></div>
         
-        <h1>Teacher Artifact Library</h1>
+        <h1>Teacher Vibes</h1>
         <div className="hero-subtitle">
           <p>Discover and share Claude-created teaching resources for UK secondary education</p>
           <p>Save hours on lesson planning with AI-powered educational content</p>

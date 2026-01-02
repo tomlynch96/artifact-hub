@@ -39,7 +39,7 @@ function AppContent() {
         <nav>
           <div className="nav-content">
             <div className="nav-left">
-              <h2>Artifact Library</h2>
+              <h2>Teacher Vibes</h2>
             </div>
             <div className="nav-right">
               <button 
@@ -65,7 +65,7 @@ function AppContent() {
       <nav>
         <div className="nav-content">
           <div className="nav-left">
-            <h2>Artifact Library</h2>
+            <h2>Teacher Vibes</h2>
             <button 
               onClick={() => setCurrentPage('home')}
               style={{
