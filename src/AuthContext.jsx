@@ -25,13 +25,7 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const signUp = async (email, password) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: 'https://teachervibes.org'
-      }
-    })
+    const { error } = await supabase.auth.signUp({ email, password })
     if (error) throw error
   }
 
