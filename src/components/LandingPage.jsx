@@ -140,7 +140,7 @@ export default function LandingPage({ onSignUpClick }) {
 
   // Get color based on subject
   const getSubjectColor = (subjects) => {
-    if (!subjects || subjects.length === 0) return 'bg-indigo-600'
+    if (!subjects || subjects.length === 0) return 'bg-#2C5F2D'
     const subject = subjects[0]
     
     const colorMap = {
@@ -149,10 +149,10 @@ export default function LandingPage({ onSignUpClick }) {
       'Biology': 'bg-emerald-500',
       'Chemistry': 'bg-purple-500',
       'English': 'bg-pink-500',
-      'Computer Science': 'bg-indigo-600'
+      'Computer Science': 'bg-#2C5F2D'
     }
     
-    return colorMap[subject] || 'bg-indigo-600'
+    return colorMap[subject] || 'bg-#2C5F2D'
   }
 
   const getSubjectColorLight = (subjects) => {
@@ -174,7 +174,7 @@ export default function LandingPage({ onSignUpClick }) {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'white',
+      background: '#F5F1E8',
       color: '#1A1A1A',
       fontFamily: 'system-ui, -apple-system, sans-serif',
       display: 'flex',
@@ -234,21 +234,21 @@ export default function LandingPage({ onSignUpClick }) {
             alignItems: 'center',
             gap: '8px',
             padding: '4px 12px',
-            background: '#F1F1F0',
-            border: '1px solid #EBEBE9',
+            background: '#E8E1D0',
+            border: '1px solid #E8E1D0',
             borderRadius: '24px',
             fontSize: '11px',
             fontWeight: 'bold',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            color: '#A09F9C',
+            color: '#6B7280',
             margin: '0 auto 16px',
             width: 'fit-content'
           }}>
             <span style={{
               width: '6px',
               height: '6px',
-              background: '#C06543',
+              background: '#2C5F2D',
               borderRadius: '50%',
               animation: 'pulse 2s infinite',
               transition: 'background 1s'
@@ -266,7 +266,7 @@ export default function LandingPage({ onSignUpClick }) {
           }}>
             Teaching resources <br />
             <span style={{
-              color: '#C06543',
+              color: '#2C5F2D',
               fontFamily: 'monospace',
               display: 'inline-block',
               minWidth: '300px'
@@ -276,7 +276,7 @@ export default function LandingPage({ onSignUpClick }) {
                 display: 'inline-block',
                 width: '3px',
                 height: '0.8em',
-                background: '#C06543',
+                background: '#2C5F2D',
                 marginLeft: '4px',
                 verticalAlign: 'middle'
               }} className="animate-blink" />
@@ -286,7 +286,7 @@ export default function LandingPage({ onSignUpClick }) {
           {/* Subtitle */}
           <p style={{
             fontSize: 'clamp(16px, 3vw, 24px)',
-            color: '#5F5E5B',
+            color: '#6B7280',
             maxWidth: '672px',
             margin: '0 auto',
             lineHeight: '1.6',
@@ -342,7 +342,7 @@ export default function LandingPage({ onSignUpClick }) {
                 padding: '16px 40px',
                 background: 'white',
                 color: '#1A1A1A',
-                border: '2px solid #EBEBE9',
+                border: '2px solid #E8E1D0',
                 borderRadius: '24px',
                 fontWeight: 'bold',
                 fontSize: 'clamp(16px, 2vw, 18px)',
@@ -351,11 +351,11 @@ export default function LandingPage({ onSignUpClick }) {
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = '#F7F7F5'
-                e.currentTarget.style.borderColor = '#C06543'
+                e.currentTarget.style.borderColor = '#2C5F2D'
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'white'
-                e.currentTarget.style.borderColor = '#EBEBE9'
+                e.currentTarget.style.borderColor = '#E8E1D0'
               }}
             >
               Find Out More
@@ -431,7 +431,7 @@ export default function LandingPage({ onSignUpClick }) {
                     position: 'relative',
                     overflow: 'hidden',
                     borderRadius: 'clamp(8px, 1.5vw, 12px)',
-                    border: '1px solid #E5E5E5',
+                    border: '1px solid #E8E1D0',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
                   }}>
                   {featuredArtifacts.map((artifact, idx) => (
@@ -512,7 +512,7 @@ export default function LandingPage({ onSignUpClick }) {
                       <div style={{
                         background: 'rgba(255, 255, 255, 0.98)',
                         backdropFilter: 'blur(10px)',
-                        borderTop: '1px solid #E5E5E5',
+                        borderTop: '1px solid #E8E1D0',
                         padding: 'clamp(12px, 2vw, 20px) clamp(16px, 3vw, 32px)',
                         position: 'relative',
                         zIndex: 2
@@ -543,7 +543,7 @@ export default function LandingPage({ onSignUpClick }) {
                   right: 'clamp(-16px, -5vw, -48px)',
                   top: 'clamp(60px, 10vw, 100px)',
                   background: 'white',
-                  border: '1px solid #EBEBE9',
+                  border: '1px solid #E8E1D0',
                   padding: 'clamp(16px, 4vw, 28px)',
                   borderRadius: 'clamp(16px, 3vw, 24px)',
                   boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
@@ -554,7 +554,7 @@ export default function LandingPage({ onSignUpClick }) {
                   <div style={{
                     fontSize: 'clamp(10px, 1.5vw, 12px)',
                     fontWeight: 'black',
-                    color: '#A09F9C',
+                    color: '#6B7280',
                     textTransform: 'uppercase',
                     letterSpacing: '0.1em',
                     marginBottom: '6px'
@@ -572,7 +572,7 @@ export default function LandingPage({ onSignUpClick }) {
                   <div style={{
                     fontSize: 'clamp(10px, 1.5vw, 12px)',
                     fontWeight: 'bold',
-                    color: '#C06543',
+                    color: '#2C5F2D',
                     textTransform: 'uppercase',
                     marginBottom: '4px'
                   }}>
@@ -606,7 +606,7 @@ export default function LandingPage({ onSignUpClick }) {
                   style={{
                     height: '6px',
                     width: activeAppletIndex === idx ? '32px' : '8px',
-                    background: activeAppletIndex === idx ? 'black' : '#EBEBE9',
+                    background: activeAppletIndex === idx ? 'black' : '#E8E1D0',
                     border: 'none',
                     borderRadius: '3px',
                     cursor: 'pointer',
@@ -622,9 +622,9 @@ export default function LandingPage({ onSignUpClick }) {
 
       {/* Information Section */}
       <section id="info-section" style={{
-        background: '#FAFAFA',
+        background: '#FFFFFF',
         padding: 'clamp(64px, 12vw, 120px) 16px',
-        borderTop: '1px solid #EBEBE9'
+        borderTop: '1px solid #E8E1D0'
       }}>
         <div style={{
           maxWidth: '1100px',
@@ -646,7 +646,7 @@ export default function LandingPage({ onSignUpClick }) {
             </h2>
             <p style={{
               fontSize: 'clamp(16px, 3vw, 20px)',
-              color: '#5F5E5B',
+              color: '#6B7280',
               maxWidth: '800px',
               margin: '0 auto 24px',
               lineHeight: '1.7'
@@ -655,7 +655,7 @@ export default function LandingPage({ onSignUpClick }) {
             </p>
             <p style={{
               fontSize: 'clamp(16px, 3vw, 20px)',
-              color: '#5F5E5B',
+              color: '#6B7280',
               maxWidth: '800px',
               margin: '0 auto',
               lineHeight: '1.7'
@@ -666,10 +666,10 @@ export default function LandingPage({ onSignUpClick }) {
 
           {/* How It Works */}
           <div style={{
-            background: 'white',
+            background: '#F5F1E8',
             padding: 'clamp(40px, 7vw, 64px)',
             borderRadius: '20px',
-            border: '1px solid #EBEBE9',
+            border: '1px solid #E8E1D0',
             marginBottom: 'clamp(64px, 10vw, 100px)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
           }}>
@@ -692,7 +692,7 @@ export default function LandingPage({ onSignUpClick }) {
                 <div style={{
                   width: '56px',
                   height: '56px',
-                  background: '#C06543',
+                  background: '#2C5F2D',
                   color: 'white',
                   borderRadius: '50%',
                   display: 'flex',
@@ -714,7 +714,7 @@ export default function LandingPage({ onSignUpClick }) {
                 </h4>
                 <p style={{
                   fontSize: 'clamp(13px, 2vw, 15px)',
-                  color: '#5F5E5B',
+                  color: '#6B7280',
                   lineHeight: '1.5'
                 }}>
                   Browse interactive learning activities created by teachers across subjects and key stages
@@ -725,7 +725,7 @@ export default function LandingPage({ onSignUpClick }) {
                 <div style={{
                   width: '56px',
                   height: '56px',
-                  background: '#C06543',
+                  background: '#2C5F2D',
                   color: 'white',
                   borderRadius: '50%',
                   display: 'flex',
@@ -747,7 +747,7 @@ export default function LandingPage({ onSignUpClick }) {
                 </h4>
                 <p style={{
                   fontSize: 'clamp(13px, 2vw, 15px)',
-                  color: '#5F5E5B',
+                  color: '#6B7280',
                   lineHeight: '1.5'
                 }}>
                   Test artifacts live and vote to help the community surface the most effective resources
@@ -758,7 +758,7 @@ export default function LandingPage({ onSignUpClick }) {
                 <div style={{
                   width: '56px',
                   height: '56px',
-                  background: '#C06543',
+                  background: '#2C5F2D',
                   color: 'white',
                   borderRadius: '50%',
                   display: 'flex',
@@ -780,7 +780,7 @@ export default function LandingPage({ onSignUpClick }) {
                 </h4>
                 <p style={{
                   fontSize: 'clamp(13px, 2vw, 15px)',
-                  color: '#5F5E5B',
+                  color: '#6B7280',
                   lineHeight: '1.5'
                 }}>
                   Create your own interactive tools with AI and share them with fellow educators
@@ -792,23 +792,20 @@ export default function LandingPage({ onSignUpClick }) {
           {/* Final CTA */}
           <div style={{
             textAlign: 'center',
-            background: 'linear-gradient(135deg, #C06543 0%, #A8553A 100%)',
-            padding: 'clamp(48px, 8vw, 72px) clamp(24px, 5vw, 48px)',
-            borderRadius: '24px',
-            color: 'white'
+            padding: 'clamp(48px, 8vw, 72px) clamp(24px, 5vw, 48px)'
           }}>
             <h3 style={{
               fontSize: 'clamp(28px, 5vw, 40px)',
               fontWeight: 'bold',
               marginBottom: '16px',
-              color: 'white'
+              color: '#1A1A1A'
             }}>
               Join the Movement
             </h3>
             <p style={{
               fontSize: 'clamp(16px, 3vw, 20px)',
               marginBottom: '32px',
-              opacity: '0.95',
+              color: '#6B7280',
               maxWidth: '600px',
               margin: '0 auto 32px',
               lineHeight: '1.6'
@@ -819,8 +816,8 @@ export default function LandingPage({ onSignUpClick }) {
               onClick={onSignUpClick}
               style={{
                 padding: '18px 48px',
-                background: 'white',
-                color: '#C06543',
+                background: 'black',
+                color: 'white',
                 borderRadius: '24px',
                 fontWeight: 'bold',
                 fontSize: 'clamp(16px, 2.5vw, 18px)',
@@ -846,9 +843,10 @@ export default function LandingPage({ onSignUpClick }) {
 
       {/* Stats Section */}
       <section style={{
-        borderTop: '1px solid #EBEBE9',
+        borderTop: '1px solid #E8E1D0',
         padding: 'clamp(48px, 8vw, 64px) 16px',
-        textAlign: 'center'
+        textAlign: 'center',
+        background: '#F5F1E8'
       }}>
         <div style={{
           maxWidth: '1024px',
@@ -863,14 +861,14 @@ export default function LandingPage({ onSignUpClick }) {
               fontWeight: 'black',
               letterSpacing: '-0.02em',
               marginBottom: '4px',
-              color: '#C06543'
+              color: '#2C5F2D'
             }}>
               {stats.artifactCount}
             </div>
             <div style={{
               fontSize: 'clamp(10px, 2vw, 12px)',
               fontWeight: 'bold',
-              color: '#A09F9C',
+              color: '#6B7280',
               textTransform: 'uppercase',
               letterSpacing: '0.05em'
             }}>
@@ -883,14 +881,14 @@ export default function LandingPage({ onSignUpClick }) {
               fontWeight: 'black',
               letterSpacing: '-0.02em',
               marginBottom: '4px',
-              color: '#C06543'
+              color: '#2C5F2D'
             }}>
               {stats.contributorCount}
             </div>
             <div style={{
               fontSize: 'clamp(10px, 2vw, 12px)',
               fontWeight: 'bold',
-              color: '#A09F9C',
+              color: '#6B7280',
               textTransform: 'uppercase',
               letterSpacing: '0.05em'
             }}>
@@ -903,14 +901,14 @@ export default function LandingPage({ onSignUpClick }) {
               fontWeight: 'black',
               letterSpacing: '-0.02em',
               marginBottom: '4px',
-              color: '#C06543'
+              color: '#2C5F2D'
             }}>
               {topArtifacts.reduce((sum, a) => sum + (a.voteCount || 0), 0)}
             </div>
             <div style={{
               fontSize: 'clamp(10px, 2vw, 12px)',
               fontWeight: 'bold',
-              color: '#A09F9C',
+              color: '#6B7280',
               textTransform: 'uppercase',
               letterSpacing: '0.05em'
             }}>
@@ -924,12 +922,13 @@ export default function LandingPage({ onSignUpClick }) {
       <footer style={{
         padding: '40px 16px',
         textAlign: 'center',
-        borderTop: '1px solid #EBEBE9',
+        borderTop: '1px solid #E8E1D0',
         fontSize: '11px',
         fontWeight: 'bold',
-        color: '#A09F9C',
+        color: '#6B7280',
         textTransform: 'uppercase',
-        letterSpacing: '0.2em'
+        letterSpacing: '0.2em',
+        background: '#FFFFFF'
       }}>
         TeacherVibes • Built by Teachers, Powered by AI • 2026
       </footer>
