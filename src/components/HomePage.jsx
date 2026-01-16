@@ -313,43 +313,17 @@ export default function HomePage() {
                 </div>
 
                 {/* Favorites Toggle as Tabs - Always visible */}
-                <div style={{
-                  display: 'flex',
-                  background: 'var(--background-light-gray)',
-                  borderRadius: '8px',
-                  padding: '4px',
-                  gap: '4px'
-                }}>
+                <div className="favorites-toggle">
                   <button
                     onClick={() => setShowFavoritesOnly(false)}
-                    style={{
-                      padding: '8px 16px',
-                      background: !showFavoritesOnly ? 'var(--background-white)' : 'transparent',
-                      color: !showFavoritesOnly ? 'var(--text-dark)' : 'var(--text-gray)',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      boxShadow: !showFavoritesOnly ? 'var(--shadow-sm)' : 'none'
-                    }}
+                    className={!showFavoritesOnly ? 'active' : ''}
                   >
                     All
                   </button>
                   <button
                     onClick={() => setShowFavoritesOnly(true)}
+                    className={showFavoritesOnly ? 'active' : ''}
                     style={{
-                      padding: '8px 16px',
-                      background: showFavoritesOnly ? 'var(--background-white)' : 'transparent',
-                      color: showFavoritesOnly ? 'var(--text-dark)' : 'var(--text-gray)',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      boxShadow: showFavoritesOnly ? 'var(--shadow-sm)' : 'none',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px'
