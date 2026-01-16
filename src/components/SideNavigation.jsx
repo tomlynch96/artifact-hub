@@ -173,17 +173,20 @@ export default function SideNavigation({ currentPage, onNavigate, user, onSignOu
         left: isOpen ? 0 : '-280px',
         width: '280px',
         height: '100vh',
+        height: '100dvh', // Dynamic viewport height for mobile
         background: 'white',
         zIndex: 999,
         transition: 'left 0.2s ease-out',
         display: 'flex',
         flexDirection: 'column',
-        borderRight: '1px solid #E8E1D0'
+        borderRight: '1px solid #E8E1D0',
+        overflow: 'hidden'
       }}>
         {/* Menu Header */}
         <div style={{
           padding: '20px 24px',
-          borderBottom: '1px solid #E8E1D0'
+          borderBottom: '1px solid #E8E1D0',
+          flexShrink: 0
         }}>
           <span style={{
             fontSize: '16px',
@@ -194,10 +197,13 @@ export default function SideNavigation({ currentPage, onNavigate, user, onSignOu
           </span>
         </div>
 
-        {/* Navigation Items */}
+        {/* Navigation Items - Scrollable */}
         <nav style={{ 
-          flex: 1, 
-          padding: '8px 0'
+          flex: 1,
+          padding: '8px 0',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          minHeight: 0
         }}>
           {/* Browse Artifacts */}
           <button
@@ -336,10 +342,12 @@ export default function SideNavigation({ currentPage, onNavigate, user, onSignOu
           </button>
         </nav>
 
-        {/* Bottom Section - Submit */}
+        {/* Bottom Section - Submit - Always Visible */}
         <div style={{
           borderTop: '1px solid #E8E1D0',
-          padding: '12px'
+          padding: '12px',
+          flexShrink: 0,
+          background: 'white'
         }}>
           <button
             onClick={() => handleNavClick('submit')}
