@@ -1,114 +1,48 @@
-import { useState } from 'react'
-import { AuthProvider, useAuth } from './AuthContext'
+import { useState, useEffect } from 'react'
+import { supabase } from './supabaseClient'
+import { useAuth, AuthProvider } from './AuthContext'
 import Auth from './components/Auth'
 import HomePage from './components/HomePage'
-import LandingPage from './components/LandingPage'
 import SubmitArtifact from './components/SubmitArtifact'
+import LandingPage from './components/LandingPage'
+import SideNavigation from './components/SideNavigation'
+import MyProfile from './components/MyProfile'
+import AboutPage from './components/AboutPage'
 import './App.css'
 
 function AppContent() {
-  const { user, loading, signOut } = useAuth()
-  const [currentPage, setCurrentPage] = useState('home')
+  const { user } = useAuth()
+  const [currentPage, setCurrentPage] = useState('browse')
   const [showAuth, setShowAuth] = useState(false)
 
-  if (loading) {
-    return (
-      <div style={{ 
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        fontSize: '18px',
-        color: 'var(--text-gray)'
-      }}>
-        Loading...
-      </div>
-    )
+  const signOut = async () => {
+    await supabase.auth.signOut()
   }
 
-  // Show auth modal if user clicked sign up from landing page
-  if (!user && showAuth) {
-    return <Auth />
-  }
-
-  // Show landing page if not authenticated
   if (!user) {
-    return (
-      <div style={{ minHeight: '100vh' }}>
-        {/* Simple nav for landing page */}
-        <nav>
-          <div className="nav-content">
-            <div className="nav-left">
-              <h2>Teacher Vibes</h2>
-            </div>
-            <div className="nav-right">
-              <button 
-                onClick={() => setShowAuth(true)}
-                className="primary"
-              >
-                Sign In / Sign Up
-              </button>
-            </div>
-          </div>
-        </nav>
-
-        <main>
-          <LandingPage onSignUpClick={() => setShowAuth(true)} />
-        </main>
-      </div>
-    )
+    // Show full-page auth if user clicked sign up
+    if (showAuth) {
+      return <Auth />
+    }
+    
+    // Otherwise show landing page
+    return <LandingPage onSignUpClick={() => setShowAuth(true)} />
   }
 
-  // Authenticated user view
   return (
-    <div style={{ minHeight: '100vh' }}>
-      <nav>
-        <div className="nav-content">
-          <div className="nav-left">
-            <h2>Teacher Vibes</h2>
-            <button 
-              onClick={() => setCurrentPage('home')}
-              style={{
-                fontWeight: currentPage === 'home' ? '600' : '500',
-                color: currentPage === 'home' ? 'var(--primary-terracotta)' : 'var(--text-gray)'
-              }}
-            >
-              Browse
-            </button>
-            <button 
-              onClick={() => setCurrentPage('submit')}
-              style={{
-                background: currentPage === 'submit' ? 'var(--btn-primary-bg)' : 'transparent',
-                color: currentPage === 'submit' ? 'var(--btn-primary-text)' : 'var(--text-gray)',
-                fontWeight: '600'
-              }}
-            >
-              + Submit
-            </button>
-          </div>
-          <div className="nav-right">
-            <span className="user-email">{user.email}</span>
-            <button 
-              onClick={signOut}
-              style={{
-                padding: '8px 16px',
-                background: 'transparent',
-                border: '1px solid var(--border-color)',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-      </nav>
+    <div>
+      <SideNavigation 
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
+        user={user}
+        onSignOut={signOut}
+      />
 
       <main>
-        {currentPage === 'home' && <HomePage />}
-        {currentPage === 'submit' && <SubmitArtifact onSuccess={() => setCurrentPage('home')} />}
+        {currentPage === 'browse' && <HomePage />}
+        {currentPage === 'submit' && <SubmitArtifact onSuccess={() => setCurrentPage('browse')} />}
+        {currentPage === 'profile' && <MyProfile />}
+        {currentPage === 'about' && <AboutPage />}
       </main>
     </div>
   )
