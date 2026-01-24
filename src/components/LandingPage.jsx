@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 
-export default function LandingPage({ onSignUpClick }) {
+export default function LandingPage({ onSignUpClick, onBrowseClick }) {
   const [topArtifacts, setTopArtifacts] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeAppletIndex, setActiveAppletIndex] = useState(0)
@@ -306,7 +306,7 @@ export default function LandingPage({ onSignUpClick }) {
             paddingTop: '24px'
           }}>
             <button 
-              onClick={onSignUpClick}
+              onClick={onBrowseClick}
               style={{
                 padding: '16px 40px',
                 background: 'black',
@@ -813,7 +813,7 @@ export default function LandingPage({ onSignUpClick }) {
               Be part of a community of teachers building the next generation of interactive learning activities.
             </p>
             <button 
-              onClick={onSignUpClick}
+              onClick={onBrowseClick}
               style={{
                 padding: '18px 48px',
                 background: 'black',
@@ -835,7 +835,7 @@ export default function LandingPage({ onSignUpClick }) {
                 e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)'
               }}
             >
-              Sign Up Free →
+              Take a Look →
             </button>
           </div>
         </div>

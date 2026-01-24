@@ -7,14 +7,17 @@ import { supabase } from '../supabaseClient'
 import { useAuth } from '../AuthContext'
 import SearchFilterBar from './SearchFilterBar'
 import EditArtifactModal from './EditArtifactModal'
+import SignInPromptModal from './SignInPromptModal'
 
-export default function HomePage() {
+export default function HomePage({ onSignInRequired }) {
   const { user } = useAuth()
   const [artifacts, setArtifacts] = useState([])
   const [filteredArtifacts, setFilteredArtifacts] = useState([])
   const [loading, setLoading] = useState(true)
   const [editingArtifact, setEditingArtifact] = useState(null)
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+  const [showSignInPrompt, setShowSignInPrompt] = useState(false)
+  const [signInPromptMessage, setSignInPromptMessage] = useState('')
 
   useEffect(() => {
     fetchArtifacts()
@@ -91,7 +94,11 @@ export default function HomePage() {
   }
 
   const handleVote = async (artifactId, currentlyVoted) => {
-    if (!user) return
+    if (!user) {
+      setSignInPromptMessage('Sign in to vote on artifacts and help the community discover the best resources!')
+      setShowSignInPrompt(true)
+      return
+    }
 
     try {
       if (currentlyVoted) {
@@ -117,7 +124,11 @@ export default function HomePage() {
   }
 
   const handleFavorite = async (artifactId, currentlyFavorited) => {
-    if (!user) return
+    if (!user) {
+      setSignInPromptMessage('Sign in to save your favorite artifacts and build your personal collection!')
+      setShowSignInPrompt(true)
+      return
+    }
 
     try {
       if (currentlyFavorited) {
@@ -230,6 +241,16 @@ export default function HomePage() {
     fetchArtifacts()
   }
 
+  const handleFavoritesToggle = (shouldShowFavorites) => {
+    if (shouldShowFavorites && !user) {
+      setSignInPromptMessage('Sign in to view and organize your favorite teaching resources!')
+      setShowSignInPrompt(true)
+      return
+    }
+    
+    setShowFavoritesOnly(shouldShowFavorites)
+  }
+
   if (loading) {
     return (
       <div style={{ 
@@ -315,13 +336,13 @@ export default function HomePage() {
                 {/* Favorites Toggle as Tabs - Always visible */}
                 <div className="favorites-toggle">
                   <button
-                    onClick={() => setShowFavoritesOnly(false)}
+                    onClick={() => handleFavoritesToggle(false)}
                     className={!showFavoritesOnly ? 'active' : ''}
                   >
                     All
                   </button>
                   <button
-                    onClick={() => setShowFavoritesOnly(true)}
+                    onClick={() => handleFavoritesToggle(true)}
                     className={showFavoritesOnly ? 'active' : ''}
                     style={{
                       display: 'flex',
@@ -653,6 +674,19 @@ export default function HomePage() {
           artifact={editingArtifact}
           onClose={() => setEditingArtifact(null)}
           onSuccess={handleEditSuccess}
+        />
+      )}
+
+      {showSignInPrompt && (
+        <SignInPromptModal
+          message={signInPromptMessage}
+          onClose={() => setShowSignInPrompt(false)}
+          onSignIn={() => {
+            setShowSignInPrompt(false)
+            if (onSignInRequired) {
+              onSignInRequired()
+            }
+          }}
         />
       )}
     </div>
