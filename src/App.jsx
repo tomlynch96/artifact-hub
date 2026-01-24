@@ -14,9 +14,14 @@ function AppContent() {
   const { user } = useAuth()
   const [currentPage, setCurrentPage] = useState('browse')
   const [showAuth, setShowAuth] = useState(false)
+  const [viewingBrowse, setViewingBrowse] = useState(false)
 
   const signOut = async () => {
     await supabase.auth.signOut()
+  }
+
+  const handleSignInRequired = () => {
+    setShowAuth(true)
   }
 
   if (!user) {
@@ -25,8 +30,43 @@ function AppContent() {
       return <Auth />
     }
     
+    // Show browse page for non-authenticated users who clicked "Browse"
+    if (viewingBrowse) {
+      return (
+        <div>
+          <SideNavigation 
+            currentPage="browse"
+            onNavigate={(page) => {
+              if (page === 'browse' || page === 'about') {
+                // Allow these pages
+                setCurrentPage(page)
+              } else if (page === 'home') {
+                setViewingBrowse(false)
+              } else {
+                // Protected pages (submit, profile, favourites) - show auth
+                setShowAuth(true)
+              }
+            }}
+            user={null}
+            onSignOut={() => {}}
+            onSignInClick={() => setShowAuth(true)}
+            onLogoClick={() => setViewingBrowse(false)}
+          />
+
+          <main>
+            <HomePage onSignInRequired={handleSignInRequired} />
+          </main>
+        </div>
+      )
+    }
+    
     // Otherwise show landing page
-    return <LandingPage onSignUpClick={() => setShowAuth(true)} />
+    return (
+      <LandingPage 
+        onSignUpClick={() => setShowAuth(true)} 
+        onBrowseClick={() => setViewingBrowse(true)}
+      />
+    )
   }
 
   return (
