@@ -20,9 +20,8 @@ export default function SubmitArtifact({ onSuccess }) {
     setLoading(true)
 
     try {
-      if (!formData.artifact_url.startsWith('https://claude.ai/public/artifacts/') && 
-          !formData.artifact_url.startsWith('https://claude.site/artifacts/')) {
-        throw new Error('Please enter a valid Claude artifact URL')
+      if (!formData.artifact_url.startsWith('https://')) {
+        throw new Error('Please enter a valid URL starting with https://')
       }
 
       if (!screenshot) {
@@ -130,16 +129,16 @@ export default function SubmitArtifact({ onSuccess }) {
             </div>
 
             <div style={{ marginBottom: '24px' }}>
-              <label>Claude Artifact URL *</label>
+              <label>Resource URL *</label>
               <input
                 type="url"
                 value={formData.artifact_url}
                 onChange={(e) => setFormData({ ...formData, artifact_url: e.target.value })}
-                placeholder="https://claude.ai/public/artifacts/..."
+                placeholder="https://..."
                 required
               />
               <p style={{ fontSize: '13px', color: 'var(--text-gray)', marginTop: '6px' }}>
-                Paste the share link from your Claude artifact
+                Paste the URL for your teaching resource
               </p>
             </div>
 
