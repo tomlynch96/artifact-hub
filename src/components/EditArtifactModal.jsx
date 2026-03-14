@@ -33,9 +33,8 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
     setLoading(true)
 
     try {
-      if (!formData.artifact_url.startsWith('https://claude.ai/public/artifacts/') && 
-          !formData.artifact_url.startsWith('https://claude.site/artifacts/')) {
-        throw new Error('Please enter a valid Claude artifact URL')
+      if (!formData.artifact_url.startsWith('https://')) {
+        throw new Error('Please enter a valid URL starting with https://')
       }
 
       let screenshot_url = artifact.screenshot_url
@@ -220,13 +219,13 @@ export default function EditArtifactModal({ artifact, onClose, onSuccess }) {
               color: 'var(--text-dark)',
               fontSize: '14px'
             }}>
-              Claude Artifact URL *
+              Resource URL *
             </label>
             <input
               type="url"
               value={formData.artifact_url}
               onChange={(e) => setFormData({ ...formData, artifact_url: e.target.value })}
-              placeholder="https://claude.ai/public/artifacts/..."
+              placeholder="https://..."
               required
               style={{
                 width: '100%',
